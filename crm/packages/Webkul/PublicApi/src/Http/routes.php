@@ -18,6 +18,7 @@ use Webkul\PublicApi\Http\Controllers\ScheduledEmailController;
 use Webkul\PublicApi\Http\Controllers\ReportController;
 use Webkul\PublicApi\Http\Controllers\TagController;
 use Webkul\PublicApi\Http\Controllers\TrashController;
+use Webkul\PublicApi\Http\Controllers\GdprController;
 
 Route::prefix('api/v1')->group(function () {
     // Public auth routes
@@ -113,6 +114,11 @@ Route::prefix('api/v1')->group(function () {
         Route::get('reports/activities/by-user', [ActivityReportController::class, 'byUser'])->name('api.v1.reports.activities.by-user');
         Route::get('reports/activities/leaderboard', [ActivityReportController::class, 'leaderboard'])->name('api.v1.reports.activities.leaderboard');
         Route::get('reports/activities/trends', [ActivityReportController::class, 'trends'])->name('api.v1.reports.activities.trends');
+
+        // GDPR
+        Route::get('gdpr/contacts/{contactId}/export', [GdprController::class, 'export'])->where('contactId', '[0-9]+')->name('api.v1.gdpr.export');
+        Route::post('gdpr/contacts/{contactId}/erase', [GdprController::class, 'erase'])->where('contactId', '[0-9]+')->name('api.v1.gdpr.erase');
+        Route::get('gdpr/contacts/{contactId}/consent', [GdprController::class, 'consentStatus'])->where('contactId', '[0-9]+')->name('api.v1.gdpr.consent');
 
         // Trash
         Route::get('trash', [TrashController::class, 'index'])->name('api.v1.trash.index');
