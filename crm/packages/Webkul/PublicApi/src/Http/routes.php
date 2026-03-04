@@ -25,6 +25,7 @@ use Webkul\PublicApi\Http\Controllers\EmailSequenceController;
 use Webkul\PublicApi\Http\Controllers\RoleController;
 use Webkul\PublicApi\Http\Controllers\PlaybookController;
 use Webkul\PublicApi\Http\Controllers\MailchimpController;
+use Webkul\PublicApi\Http\Controllers\EnrichmentController;
 
 Route::prefix('api/v1')->group(function () {
     // Public auth routes
@@ -160,6 +161,13 @@ Route::prefix('api/v1')->group(function () {
         // Broadcasting
         Route::post('broadcast/test', [BroadcastController::class, 'test'])->name('api.v1.broadcast.test');
         Route::get('broadcast/channels', [BroadcastController::class, 'channels'])->name('api.v1.broadcast.channels');
+
+        // Contact Enrichment
+        Route::get('enrichment/config', [EnrichmentController::class, 'config'])->name('api.v1.enrichment.config');
+        Route::post('enrichment/configure', [EnrichmentController::class, 'configure'])->name('api.v1.enrichment.configure');
+        Route::post('enrichment/contacts/{contactId}/enrich', [EnrichmentController::class, 'enrich'])->where('contactId', '[0-9]+')->name('api.v1.enrichment.enrich');
+        Route::get('enrichment/contacts/{contactId}', [EnrichmentController::class, 'show'])->where('contactId', '[0-9]+')->name('api.v1.enrichment.show');
+        Route::post('enrichment/bulk', [EnrichmentController::class, 'bulkEnrich'])->name('api.v1.enrichment.bulk');
 
         // Mailchimp
         Route::get('integrations/mailchimp/status', [MailchimpController::class, 'status'])->name('api.v1.mailchimp.status');
