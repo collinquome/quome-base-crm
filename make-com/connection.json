@@ -1,0 +1,51 @@
+{
+  "label": "Quome CRM Connection",
+  "type": "token",
+  "parameters": [
+    {
+      "name": "baseUrl",
+      "type": "text",
+      "label": "CRM URL",
+      "help": "Your Quome CRM URL (e.g., https://crm.yourcompany.com)",
+      "required": true
+    },
+    {
+      "name": "email",
+      "type": "email",
+      "label": "Email",
+      "required": true
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "label": "Password",
+      "required": true
+    }
+  ],
+  "api": {
+    "url": "{{parameters.baseUrl}}/api/v1/auth/login",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    "body": {
+      "email": "{{parameters.email}}",
+      "password": "{{parameters.password}}"
+    },
+    "response": {
+      "data": {
+        "token": "{{body.token}}"
+      }
+    }
+  },
+  "commonHeaders": {
+    "Authorization": "Bearer {{connection.token}}",
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "test": {
+    "url": "{{parameters.baseUrl}}/api/v1/contacts?limit=1",
+    "method": "GET"
+  }
+}

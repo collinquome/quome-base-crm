@@ -1,0 +1,277 @@
+{
+  "triggers": [
+    {
+      "name": "newContact",
+      "label": "New Contact",
+      "description": "Triggers when a new contact is created in the CRM.",
+      "type": "webhook",
+      "webhook": {
+        "subscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/subscribe",
+          "method": "POST",
+          "body": {
+            "event": "new_contact",
+            "target_url": "{{webhook.url}}"
+          }
+        },
+        "unsubscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/{{webhook.subscriptionId}}",
+          "method": "DELETE"
+        }
+      },
+      "output": [
+        { "name": "id", "type": "number", "label": "Contact ID" },
+        { "name": "name", "type": "text", "label": "Name" },
+        { "name": "email", "type": "email", "label": "Email" },
+        { "name": "phone", "type": "text", "label": "Phone" },
+        { "name": "organization", "type": "text", "label": "Organization" }
+      ]
+    },
+    {
+      "name": "newLead",
+      "label": "New Lead",
+      "description": "Triggers when a new lead is created.",
+      "type": "webhook",
+      "webhook": {
+        "subscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/subscribe",
+          "method": "POST",
+          "body": {
+            "event": "new_lead",
+            "target_url": "{{webhook.url}}"
+          }
+        },
+        "unsubscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/{{webhook.subscriptionId}}",
+          "method": "DELETE"
+        }
+      },
+      "output": [
+        { "name": "id", "type": "number", "label": "Lead ID" },
+        { "name": "title", "type": "text", "label": "Title" },
+        { "name": "status", "type": "text", "label": "Status" },
+        { "name": "lead_value", "type": "number", "label": "Value" }
+      ]
+    },
+    {
+      "name": "leadStageChanged",
+      "label": "Lead Stage Changed",
+      "description": "Triggers when a lead moves to a different pipeline stage.",
+      "type": "webhook",
+      "webhook": {
+        "subscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/subscribe",
+          "method": "POST",
+          "body": {
+            "event": "lead_stage_changed",
+            "target_url": "{{webhook.url}}"
+          }
+        },
+        "unsubscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/{{webhook.subscriptionId}}",
+          "method": "DELETE"
+        }
+      },
+      "output": [
+        { "name": "id", "type": "number", "label": "Lead ID" },
+        { "name": "title", "type": "text", "label": "Title" },
+        { "name": "old_stage", "type": "text", "label": "Old Stage" },
+        { "name": "new_stage", "type": "text", "label": "New Stage" }
+      ]
+    },
+    {
+      "name": "dealWon",
+      "label": "Deal Won",
+      "description": "Triggers when a deal is marked as won.",
+      "type": "webhook",
+      "webhook": {
+        "subscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/subscribe",
+          "method": "POST",
+          "body": {
+            "event": "deal_won",
+            "target_url": "{{webhook.url}}"
+          }
+        },
+        "unsubscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/{{webhook.subscriptionId}}",
+          "method": "DELETE"
+        }
+      },
+      "output": [
+        { "name": "id", "type": "number", "label": "Deal ID" },
+        { "name": "title", "type": "text", "label": "Title" },
+        { "name": "value", "type": "number", "label": "Value" }
+      ]
+    },
+    {
+      "name": "dealLost",
+      "label": "Deal Lost",
+      "description": "Triggers when a deal is marked as lost.",
+      "type": "webhook",
+      "webhook": {
+        "subscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/subscribe",
+          "method": "POST",
+          "body": {
+            "event": "deal_lost",
+            "target_url": "{{webhook.url}}"
+          }
+        },
+        "unsubscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/{{webhook.subscriptionId}}",
+          "method": "DELETE"
+        }
+      },
+      "output": [
+        { "name": "id", "type": "number", "label": "Deal ID" },
+        { "name": "title", "type": "text", "label": "Title" },
+        { "name": "reason", "type": "text", "label": "Reason" }
+      ]
+    },
+    {
+      "name": "newActivity",
+      "label": "New Activity",
+      "description": "Triggers when a new activity is logged.",
+      "type": "webhook",
+      "webhook": {
+        "subscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/subscribe",
+          "method": "POST",
+          "body": {
+            "event": "new_activity",
+            "target_url": "{{webhook.url}}"
+          }
+        },
+        "unsubscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/{{webhook.subscriptionId}}",
+          "method": "DELETE"
+        }
+      },
+      "output": [
+        { "name": "id", "type": "number", "label": "Activity ID" },
+        { "name": "type", "type": "text", "label": "Type" },
+        { "name": "title", "type": "text", "label": "Title" }
+      ]
+    },
+    {
+      "name": "emailReceived",
+      "label": "Email Received",
+      "description": "Triggers when a new email is received and synced.",
+      "type": "webhook",
+      "webhook": {
+        "subscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/subscribe",
+          "method": "POST",
+          "body": {
+            "event": "email_received",
+            "target_url": "{{webhook.url}}"
+          }
+        },
+        "unsubscribe": {
+          "url": "{{connection.baseUrl}}/api/v1/webhooks/{{webhook.subscriptionId}}",
+          "method": "DELETE"
+        }
+      },
+      "output": [
+        { "name": "id", "type": "number", "label": "Email ID" },
+        { "name": "subject", "type": "text", "label": "Subject" },
+        { "name": "from", "type": "email", "label": "From" }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "createContact",
+      "label": "Create Contact",
+      "description": "Creates a new contact in the CRM.",
+      "url": "{{connection.baseUrl}}/api/v1/contacts",
+      "method": "POST",
+      "parameters": [
+        { "name": "name", "type": "text", "label": "Name", "required": true },
+        { "name": "emails", "type": "email", "label": "Email" },
+        { "name": "contact_numbers", "type": "text", "label": "Phone" },
+        { "name": "organization_id", "type": "number", "label": "Organization ID" }
+      ],
+      "body": {
+        "name": "{{parameters.name}}",
+        "emails": [{ "value": "{{parameters.emails}}", "label": "work" }],
+        "contact_numbers": [{ "value": "{{parameters.contact_numbers}}", "label": "work" }],
+        "organization_id": "{{parameters.organization_id}}"
+      }
+    },
+    {
+      "name": "createLead",
+      "label": "Create Lead",
+      "description": "Creates a new lead in the CRM.",
+      "url": "{{connection.baseUrl}}/api/v1/leads",
+      "method": "POST",
+      "parameters": [
+        { "name": "title", "type": "text", "label": "Title", "required": true },
+        { "name": "lead_value", "type": "number", "label": "Value" },
+        { "name": "person_id", "type": "number", "label": "Contact ID" },
+        { "name": "lead_pipeline_id", "type": "number", "label": "Pipeline ID" },
+        { "name": "lead_pipeline_stage_id", "type": "number", "label": "Stage ID" }
+      ],
+      "body": {
+        "title": "{{parameters.title}}",
+        "lead_value": "{{parameters.lead_value}}",
+        "person_id": "{{parameters.person_id}}",
+        "lead_pipeline_id": "{{parameters.lead_pipeline_id}}",
+        "lead_pipeline_stage_id": "{{parameters.lead_pipeline_stage_id}}"
+      }
+    },
+    {
+      "name": "updateLeadStage",
+      "label": "Update Lead Stage",
+      "description": "Moves a lead to a different pipeline stage.",
+      "url": "{{connection.baseUrl}}/api/v1/leads/{{parameters.lead_id}}",
+      "method": "PUT",
+      "parameters": [
+        { "name": "lead_id", "type": "number", "label": "Lead ID", "required": true },
+        { "name": "lead_pipeline_stage_id", "type": "number", "label": "New Stage ID", "required": true }
+      ],
+      "body": {
+        "lead_pipeline_stage_id": "{{parameters.lead_pipeline_stage_id}}"
+      }
+    },
+    {
+      "name": "createActivity",
+      "label": "Create Activity",
+      "description": "Logs a new activity in the CRM.",
+      "url": "{{connection.baseUrl}}/api/v1/activities",
+      "method": "POST",
+      "parameters": [
+        { "name": "title", "type": "text", "label": "Title", "required": true },
+        { "name": "type", "type": "select", "label": "Type", "required": true, "options": ["call", "meeting", "note", "task", "lunch", "email"] },
+        { "name": "comment", "type": "text", "label": "Description" },
+        { "name": "schedule_from", "type": "date", "label": "Start Date/Time" },
+        { "name": "schedule_to", "type": "date", "label": "End Date/Time" }
+      ],
+      "body": {
+        "title": "{{parameters.title}}",
+        "type": "{{parameters.type}}",
+        "comment": "{{parameters.comment}}",
+        "schedule_from": "{{parameters.schedule_from}}",
+        "schedule_to": "{{parameters.schedule_to}}"
+      }
+    },
+    {
+      "name": "sendEmail",
+      "label": "Send Email",
+      "description": "Sends an email through the CRM.",
+      "url": "{{connection.baseUrl}}/api/v1/emails/bulk",
+      "method": "POST",
+      "parameters": [
+        { "name": "to", "type": "email", "label": "To Email", "required": true },
+        { "name": "subject", "type": "text", "label": "Subject", "required": true },
+        { "name": "body", "type": "text", "label": "Body (HTML)", "required": true }
+      ],
+      "body": {
+        "subject": "{{parameters.subject}}",
+        "body": "{{parameters.body}}",
+        "recipients": ["{{parameters.to}}"]
+      }
+    }
+  ]
+}

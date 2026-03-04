@@ -1,0 +1,9 @@
+{
+  "name": "quome-crm",
+  "label": "Quome CRM",
+  "description": "Connect your Quome CRM with other apps. Automate contact creation, lead management, activity logging, and email workflows.",
+  "version": "1.0.0",
+  "baseUrl": "{{connection.baseUrl}}/api/v1",
+  "authType": "token",
+  "language": "en"
+}
