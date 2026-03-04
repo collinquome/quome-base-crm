@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: quome_crm_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./crm:/var/www/html
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - quome_crm
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: quome_crm_nginx
+    restart: unless-stopped
+    ports:
+      - "8190:80"
+    volumes:
+      - ./crm:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - quome_crm
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: quome_crm_db
+    restart: unless-stopped
+    ports:
+      - "13316:3306"
+    environment:
+      MYSQL_DATABASE: krayin_crm
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: krayin
+      MYSQL_PASSWORD: secret
+    volumes:
+      - quome_crm_dbdata:/var/lib/mysql
+    networks:
+      - quome_crm
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-psecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: quome_crm_redis
+    restart: unless-stopped
+    ports:
+      - "16390:6379"
+    networks:
+      - quome_crm
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: quome_crm_mailpit
+    restart: unless-stopped
+    ports:
+      - "8191:8025"
+      - "11025:1025"
+    networks:
+      - quome_crm
+
+  queue:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: quome_crm_queue
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    volumes:
+      - ./crm:/var/www/html
+    networks:
+      - quome_crm
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: quome_crm_scheduler
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: >
+      sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
+    volumes:
+      - ./crm:/var/www/html
+    networks:
+      - quome_crm
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  quome_crm_dbdata:
+
+networks:
+  quome_crm:
+    driver: bridge

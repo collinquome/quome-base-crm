@@ -1,0 +1,41 @@
+# Dependencies
+crm/vendor/
+crm/node_modules/
+mobile/node_modules/
+extension/node_modules/
+
+# Environment files
+crm/.env
+
+# Build artifacts
+crm/public/build/
+crm/public/hot
+
+# Storage (runtime)
+crm/storage/logs/*
+!crm/storage/logs/.gitkeep
+crm/storage/framework/cache/*
+crm/storage/framework/sessions/*
+crm/storage/framework/views/*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Docker volumes
+docker/data/
+
+# Test results
+test-results/
+playwright-report/
+
+# Mobile build artifacts
+mobile/ios/build/
+mobile/android/app/build/
+mobile/.expo/
+
+# Extension build
+extension/dist/
