@@ -107,6 +107,7 @@ import VeeValidate from "./plugins/vee-validate";
 import CreateElement from "./plugins/createElement";
 import Draggable from "./plugins/draggable";
 import VueCal from "./plugins/vue-cal";
+import EchoPlugin from "./plugins/echo";
 
 [
     Admin,
@@ -117,6 +118,7 @@ import VueCal from "./plugins/vue-cal";
     Flatpickr,
     VeeValidate,
     VueCal,
+    EchoPlugin,
 ].forEach((plugin) => app.use(plugin));
 
 /**
