@@ -56,7 +56,13 @@
     <!-- Content -->
     <div class="[&>*>*>*.toolbarRight]:max-lg:w-full [&>*>*>*.toolbarRight]:max-lg:justify-between [&>*>*>*.toolbarRight]:max-md:gap-y-2 [&>*>*>*.toolbarRight]:max-md:flex-wrap mt-3.5 [&>*>*:nth-child(1)]:max-lg:!flex-wrap">
         @if ((request()->view_type ?? "kanban") == "table")
-            @include('admin::leads.index.table')
+            <x-admin::split-view
+                :list-src="route('admin.leads.index')"
+                detail-url-prefix="/admin/leads/view"
+                entity-type="lead"
+            >
+                @include('admin::leads.index.table')
+            </x-admin::split-view>
         @else
             @include('admin::leads.index.kanban')
         @endif

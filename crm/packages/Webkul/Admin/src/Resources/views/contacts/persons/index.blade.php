@@ -37,10 +37,16 @@
 
         {!! view_render_event('admin.persons.index.datagrid.before') !!}
 
-        <v-persons>
-            <!-- Datagrid shimmer -->
-            <x-admin::shimmer.datagrid :is-multi-row="true"/>
-        </v-persons>
+        <x-admin::split-view
+            :list-src="route('admin.contacts.persons.index')"
+            detail-url-prefix="/admin/contacts/persons/view"
+            entity-type="contact"
+        >
+            <v-persons>
+                <!-- Datagrid shimmer -->
+                <x-admin::shimmer.datagrid :is-multi-row="true"/>
+            </v-persons>
+        </x-admin::split-view>
 
         {!! view_render_event('admin.persons.index.datagrid.after') !!}
     </div>
