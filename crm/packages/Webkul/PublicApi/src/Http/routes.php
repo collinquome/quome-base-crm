@@ -26,6 +26,7 @@ use Webkul\PublicApi\Http\Controllers\RoleController;
 use Webkul\PublicApi\Http\Controllers\PlaybookController;
 use Webkul\PublicApi\Http\Controllers\MailchimpController;
 use Webkul\PublicApi\Http\Controllers\EnrichmentController;
+use Webkul\PublicApi\Http\Controllers\QuickBooksController;
 
 Route::prefix('api/v1')->group(function () {
     // Public auth routes
@@ -161,6 +162,15 @@ Route::prefix('api/v1')->group(function () {
         // Broadcasting
         Route::post('broadcast/test', [BroadcastController::class, 'test'])->name('api.v1.broadcast.test');
         Route::get('broadcast/channels', [BroadcastController::class, 'channels'])->name('api.v1.broadcast.channels');
+
+        // QuickBooks
+        Route::get('integrations/quickbooks/status', [QuickBooksController::class, 'status'])->name('api.v1.quickbooks.status');
+        Route::post('integrations/quickbooks/auth-url', [QuickBooksController::class, 'authUrl'])->name('api.v1.quickbooks.auth-url');
+        Route::post('integrations/quickbooks/callback', [QuickBooksController::class, 'callback'])->name('api.v1.quickbooks.callback');
+        Route::post('integrations/quickbooks/disconnect', [QuickBooksController::class, 'disconnect'])->name('api.v1.quickbooks.disconnect');
+        Route::post('integrations/quickbooks/invoices', [QuickBooksController::class, 'createInvoice'])->name('api.v1.quickbooks.create-invoice');
+        Route::post('integrations/quickbooks/sync-customer', [QuickBooksController::class, 'syncCustomer'])->name('api.v1.quickbooks.sync-customer');
+        Route::get('integrations/quickbooks/contacts/{contactId}/syncs', [QuickBooksController::class, 'contactSyncs'])->where('contactId', '[0-9]+')->name('api.v1.quickbooks.contact-syncs');
 
         // Contact Enrichment
         Route::get('enrichment/config', [EnrichmentController::class, 'config'])->name('api.v1.enrichment.config');
