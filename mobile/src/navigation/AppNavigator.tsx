@@ -11,6 +11,7 @@ import ActionStreamScreen from '../screens/ActionStreamScreen';
 import ContactsScreen from '../screens/ContactsScreen';
 import DealsScreen from '../screens/DealsScreen';
 import ActivitiesScreen from '../screens/ActivitiesScreen';
+import EmailScreen from '../screens/EmailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
 export type RootStackParamList = {
@@ -23,6 +24,7 @@ export type MainTabParamList = {
   Contacts: undefined;
   Deals: undefined;
   Activities: undefined;
+  Email: undefined;
   Settings: undefined;
 };
 
@@ -60,9 +62,14 @@ function MainTabs() {
         options={{ title: 'Activities' }}
       />
       <Tab.Screen
+        name="Email"
+        component={EmailScreen}
+        options={{ title: 'Email' }}
+      />
+      <Tab.Screen
         name="Settings"
         component={SettingsScreen}
-        options={{ title: 'Settings' }}
+        options={{ title: 'More' }}
       />
     </Tab.Navigator>
   );
