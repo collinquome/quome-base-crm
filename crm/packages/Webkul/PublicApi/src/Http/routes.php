@@ -30,6 +30,7 @@ use Webkul\PublicApi\Http\Controllers\QuickBooksController;
 use Webkul\PublicApi\Http\Controllers\XeroController;
 use Webkul\PublicApi\Http\Controllers\GoogleCalendarController;
 use Webkul\PublicApi\Http\Controllers\OutlookCalendarController;
+use Webkul\PublicApi\Http\Controllers\VoipController;
 
 Route::prefix('api/v1')->group(function () {
     // Public auth routes
@@ -216,6 +217,15 @@ Route::prefix('api/v1')->group(function () {
         Route::post('integrations/outlook-calendar/disconnect', [OutlookCalendarController::class, 'disconnect'])->name('api.v1.outlook-calendar.disconnect');
         Route::get('integrations/outlook-calendar/events', [OutlookCalendarController::class, 'events'])->name('api.v1.outlook-calendar.events');
         Route::post('integrations/outlook-calendar/sync-activity', [OutlookCalendarController::class, 'syncActivity'])->name('api.v1.outlook-calendar.sync-activity');
+
+        // VoIP / Click-to-Call
+        Route::get('integrations/voip/status', [VoipController::class, 'status'])->name('api.v1.voip.status');
+        Route::post('integrations/voip/configure', [VoipController::class, 'configure'])->name('api.v1.voip.configure');
+        Route::post('integrations/voip/disconnect', [VoipController::class, 'disconnect'])->name('api.v1.voip.disconnect');
+        Route::post('integrations/voip/call', [VoipController::class, 'call'])->name('api.v1.voip.call');
+        Route::post('integrations/voip/webhook', [VoipController::class, 'webhook'])->name('api.v1.voip.webhook');
+        Route::get('integrations/voip/contacts/{contactId}/calls', [VoipController::class, 'contactCalls'])->where('contactId', '[0-9]+')->name('api.v1.voip.contact-calls');
+        Route::get('integrations/voip/recordings/{callLogId}', [VoipController::class, 'recording'])->where('callLogId', '[0-9]+')->name('api.v1.voip.recording');
 
         // Trash
         Route::get('trash', [TrashController::class, 'index'])->name('api.v1.trash.index');
