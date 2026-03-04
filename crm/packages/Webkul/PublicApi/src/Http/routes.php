@@ -23,6 +23,7 @@ use Webkul\PublicApi\Http\Controllers\BroadcastController;
 use Webkul\PublicApi\Http\Controllers\BackupController;
 use Webkul\PublicApi\Http\Controllers\EmailSequenceController;
 use Webkul\PublicApi\Http\Controllers\RoleController;
+use Webkul\PublicApi\Http\Controllers\PlaybookController;
 
 Route::prefix('api/v1')->group(function () {
     // Public auth routes
@@ -123,6 +124,16 @@ Route::prefix('api/v1')->group(function () {
         Route::get('gdpr/contacts/{contactId}/export', [GdprController::class, 'export'])->where('contactId', '[0-9]+')->name('api.v1.gdpr.export');
         Route::post('gdpr/contacts/{contactId}/erase', [GdprController::class, 'erase'])->where('contactId', '[0-9]+')->name('api.v1.gdpr.erase');
         Route::get('gdpr/contacts/{contactId}/consent', [GdprController::class, 'consentStatus'])->where('contactId', '[0-9]+')->name('api.v1.gdpr.consent');
+
+        // Playbooks
+        Route::get('playbooks', [PlaybookController::class, 'index'])->name('api.v1.playbooks.index');
+        Route::post('playbooks', [PlaybookController::class, 'store'])->name('api.v1.playbooks.store');
+        Route::get('playbooks/{id}', [PlaybookController::class, 'show'])->where('id', '[0-9]+')->name('api.v1.playbooks.show');
+        Route::put('playbooks/{id}', [PlaybookController::class, 'update'])->where('id', '[0-9]+')->name('api.v1.playbooks.update');
+        Route::delete('playbooks/{id}', [PlaybookController::class, 'destroy'])->where('id', '[0-9]+')->name('api.v1.playbooks.destroy');
+        Route::post('playbooks/{id}/steps', [PlaybookController::class, 'addStep'])->where('id', '[0-9]+')->name('api.v1.playbooks.add-step');
+        Route::post('playbooks/{id}/execute', [PlaybookController::class, 'execute'])->where('id', '[0-9]+')->name('api.v1.playbooks.execute');
+        Route::post('playbook-executions/{id}/cancel', [PlaybookController::class, 'cancelExecution'])->where('id', '[0-9]+')->name('api.v1.playbook-executions.cancel');
 
         // Roles
         Route::get('roles', [RoleController::class, 'index'])->name('api.v1.roles.index');
