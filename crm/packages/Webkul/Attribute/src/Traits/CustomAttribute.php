@@ -169,7 +169,10 @@ trait CustomAttribute
         parent::boot();
 
         static::deleting(function ($entity) {
-            $entity->attribute_values()->delete();
+            // Only delete attribute values on force delete, not soft delete
+            if (! method_exists($entity, 'isForceDeleting') || $entity->isForceDeleting()) {
+                $entity->attribute_values()->delete();
+            }
         });
     }
 }

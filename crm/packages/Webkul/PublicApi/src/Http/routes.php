@@ -10,6 +10,7 @@ use Webkul\PublicApi\Http\Controllers\ActionStreamController;
 use Webkul\PublicApi\Http\Controllers\CommentController;
 use Webkul\PublicApi\Http\Controllers\NotificationController;
 use Webkul\PublicApi\Http\Controllers\TagController;
+use Webkul\PublicApi\Http\Controllers\TrashController;
 
 Route::prefix('api/v1')->group(function () {
     // Public auth routes
@@ -18,7 +19,7 @@ Route::prefix('api/v1')->group(function () {
         ->name('api.v1.auth.login');
 
     // Protected routes
-    Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+    Route::middleware(['auth:sanctum', 'throttle:300,1'])->group(function () {
         // Auth
         Route::post('auth/logout', [AuthController::class, 'logout'])->name('api.v1.auth.logout');
         Route::get('auth/me', [AuthController::class, 'me'])->name('api.v1.auth.me');
@@ -60,5 +61,10 @@ Route::prefix('api/v1')->group(function () {
         Route::post('comments', [CommentController::class, 'store'])->name('api.v1.comments.store');
         Route::put('comments/{id}', [CommentController::class, 'update'])->name('api.v1.comments.update');
         Route::delete('comments/{id}', [CommentController::class, 'destroy'])->name('api.v1.comments.destroy');
+
+        // Trash
+        Route::get('trash', [TrashController::class, 'index'])->name('api.v1.trash.index');
+        Route::post('trash/{type}/{id}/restore', [TrashController::class, 'restore'])->name('api.v1.trash.restore');
+        Route::delete('trash/{type}/{id}', [TrashController::class, 'forceDelete'])->name('api.v1.trash.force-delete');
     });
 });

@@ -15,6 +15,12 @@ class ContactServiceProvider extends ServiceProvider
     public function boot(Router $router)
     {
         $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \Webkul\Contact\Console\Commands\PurgeTrash::class,
+            ]);
+        }
     }
 
     /**
