@@ -28,6 +28,8 @@ use Webkul\PublicApi\Http\Controllers\MailchimpController;
 use Webkul\PublicApi\Http\Controllers\EnrichmentController;
 use Webkul\PublicApi\Http\Controllers\QuickBooksController;
 use Webkul\PublicApi\Http\Controllers\XeroController;
+use Webkul\PublicApi\Http\Controllers\GoogleCalendarController;
+use Webkul\PublicApi\Http\Controllers\OutlookCalendarController;
 
 Route::prefix('api/v1')->group(function () {
     // Public auth routes
@@ -198,6 +200,22 @@ Route::prefix('api/v1')->group(function () {
         Route::post('integrations/mailchimp/unsubscribe', [MailchimpController::class, 'unsubscribe'])->name('api.v1.mailchimp.unsubscribe');
         Route::get('integrations/mailchimp/contacts/{contactId}/status', [MailchimpController::class, 'contactStatus'])->where('contactId', '[0-9]+')->name('api.v1.mailchimp.contact-status');
         Route::get('integrations/mailchimp/contacts/{contactId}/campaigns', [MailchimpController::class, 'campaignStats'])->where('contactId', '[0-9]+')->name('api.v1.mailchimp.campaign-stats');
+
+        // Google Calendar
+        Route::get('integrations/google-calendar/status', [GoogleCalendarController::class, 'status'])->name('api.v1.google-calendar.status');
+        Route::post('integrations/google-calendar/auth-url', [GoogleCalendarController::class, 'authUrl'])->name('api.v1.google-calendar.auth-url');
+        Route::post('integrations/google-calendar/callback', [GoogleCalendarController::class, 'callback'])->name('api.v1.google-calendar.callback');
+        Route::post('integrations/google-calendar/disconnect', [GoogleCalendarController::class, 'disconnect'])->name('api.v1.google-calendar.disconnect');
+        Route::get('integrations/google-calendar/events', [GoogleCalendarController::class, 'events'])->name('api.v1.google-calendar.events');
+        Route::post('integrations/google-calendar/sync-activity', [GoogleCalendarController::class, 'syncActivity'])->name('api.v1.google-calendar.sync-activity');
+
+        // Outlook Calendar
+        Route::get('integrations/outlook-calendar/status', [OutlookCalendarController::class, 'status'])->name('api.v1.outlook-calendar.status');
+        Route::post('integrations/outlook-calendar/auth-url', [OutlookCalendarController::class, 'authUrl'])->name('api.v1.outlook-calendar.auth-url');
+        Route::post('integrations/outlook-calendar/callback', [OutlookCalendarController::class, 'callback'])->name('api.v1.outlook-calendar.callback');
+        Route::post('integrations/outlook-calendar/disconnect', [OutlookCalendarController::class, 'disconnect'])->name('api.v1.outlook-calendar.disconnect');
+        Route::get('integrations/outlook-calendar/events', [OutlookCalendarController::class, 'events'])->name('api.v1.outlook-calendar.events');
+        Route::post('integrations/outlook-calendar/sync-activity', [OutlookCalendarController::class, 'syncActivity'])->name('api.v1.outlook-calendar.sync-activity');
 
         // Trash
         Route::get('trash', [TrashController::class, 'index'])->name('api.v1.trash.index');
