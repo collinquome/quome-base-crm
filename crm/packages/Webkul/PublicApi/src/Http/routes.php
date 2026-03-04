@@ -12,6 +12,7 @@ use Webkul\PublicApi\Http\Controllers\NotificationController;
 use Webkul\PublicApi\Http\Controllers\DashboardController;
 use Webkul\PublicApi\Http\Controllers\PipelineAnalyticsController;
 use Webkul\PublicApi\Http\Controllers\ActivityReportController;
+use Webkul\PublicApi\Http\Controllers\ScheduledEmailController;
 use Webkul\PublicApi\Http\Controllers\ReportController;
 use Webkul\PublicApi\Http\Controllers\TagController;
 use Webkul\PublicApi\Http\Controllers\TrashController;
@@ -84,6 +85,13 @@ Route::prefix('api/v1')->group(function () {
         Route::put('reports/{id}', [ReportController::class, 'update'])->name('api.v1.reports.update');
         Route::delete('reports/{id}', [ReportController::class, 'destroy'])->name('api.v1.reports.destroy');
         Route::post('reports/{id}/execute', [ReportController::class, 'executeSaved'])->name('api.v1.reports.execute-saved');
+
+        // Scheduled Emails
+        Route::get('scheduled-emails', [ScheduledEmailController::class, 'index'])->name('api.v1.scheduled-emails.index');
+        Route::post('scheduled-emails', [ScheduledEmailController::class, 'store'])->name('api.v1.scheduled-emails.store');
+        Route::get('scheduled-emails/{id}', [ScheduledEmailController::class, 'show'])->name('api.v1.scheduled-emails.show');
+        Route::post('scheduled-emails/{id}/cancel', [ScheduledEmailController::class, 'cancel'])->name('api.v1.scheduled-emails.cancel');
+        Route::put('scheduled-emails/{id}/reschedule', [ScheduledEmailController::class, 'reschedule'])->name('api.v1.scheduled-emails.reschedule');
 
         // Activity Reports
         Route::get('reports/activities/summary', [ActivityReportController::class, 'summary'])->name('api.v1.reports.activities.summary');
