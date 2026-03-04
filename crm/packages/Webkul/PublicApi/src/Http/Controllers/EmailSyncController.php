@@ -360,6 +360,70 @@ class EmailSyncController extends Controller
     }
 
     /**
+     * Get filter rules for an account.
+     */
+    public function getFilterRules(int $id): JsonResponse
+    {
+        $account = DB::table('email_accounts')
+            ->where('id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (! $account) {
+            return response()->json(['message' => 'Email account not found'], 404);
+        }
+
+        return response()->json([
+            'data' => [
+                'contact_only' => (bool) $account->contact_only,
+                'filter_rules' => json_decode($account->filter_rules, true) ?? [],
+            ],
+        ]);
+    }
+
+    /**
+     * Update filter rules for an account.
+     */
+    public function updateFilterRules(Request $request, int $id): JsonResponse
+    {
+        $account = DB::table('email_accounts')
+            ->where('id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (! $account) {
+            return response()->json(['message' => 'Email account not found'], 404);
+        }
+
+        $request->validate([
+            'contact_only'          => 'sometimes|boolean',
+            'filter_rules'          => 'sometimes|array',
+            'filter_rules.*.type'   => 'required_with:filter_rules|in:block_domain,block_sender,block_subject_pattern,allow_domain,allow_sender',
+            'filter_rules.*.value'  => 'required_with:filter_rules|string|max:255',
+        ]);
+
+        $updates = ['updated_at' => now()];
+
+        if ($request->has('contact_only')) {
+            $updates['contact_only'] = $request->input('contact_only');
+        }
+
+        if ($request->has('filter_rules')) {
+            $updates['filter_rules'] = json_encode($request->input('filter_rules'));
+        }
+
+        DB::table('email_accounts')->where('id', $id)->update($updates);
+
+        return response()->json([
+            'data' => [
+                'contact_only' => (bool) ($updates['contact_only'] ?? $account->contact_only),
+                'filter_rules' => $request->input('filter_rules', json_decode($account->filter_rules, true) ?? []),
+            ],
+            'message' => 'Filter rules updated.',
+        ]);
+    }
+
+    /**
      * Format account for API response (exclude sensitive fields).
      */
     private function formatAccount(object $account): array
@@ -379,6 +443,8 @@ class EmailSyncController extends Controller
             'last_sync_at'    => $account->last_sync_at,
             'last_error'      => $account->last_error,
             'sync_days'       => $account->sync_days,
+            'contact_only'    => (bool) ($account->contact_only ?? true),
+            'filter_rules'    => json_decode($account->filter_rules ?? '[]', true),
             'created_at'      => $account->created_at,
         ];
     }

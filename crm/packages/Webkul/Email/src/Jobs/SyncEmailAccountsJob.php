@@ -62,8 +62,21 @@ class SyncEmailAccountsJob implements ShouldQueue
             ->whereNull('person_id')
             ->get();
 
+        $filterRules = json_decode($account->filter_rules ?? '[]', true) ?: [];
+        $contactOnly = (bool) ($account->contact_only ?? true);
+
         foreach ($newEmails as $email) {
-            $this->matchEmailToContact($email);
+            // Apply filter rules
+            if ($this->shouldFilterEmail($email, $filterRules)) {
+                continue;
+            }
+
+            $matched = $this->matchEmailToContact($email);
+
+            // If contact_only is enabled and no contact match, skip
+            if ($contactOnly && ! $matched) {
+                continue;
+            }
         }
 
         DB::table('email_accounts')->where('id', $account->id)->update([
@@ -76,7 +89,7 @@ class SyncEmailAccountsJob implements ShouldQueue
     /**
      * Match an email to a CRM contact by email address.
      */
-    private function matchEmailToContact(object $email): void
+    private function matchEmailToContact(object $email): bool
     {
         $fromAddresses = json_decode($email->from, true) ?? [];
         $senderAddresses = json_decode($email->sender, true) ?? [];
@@ -101,8 +114,78 @@ class SyncEmailAccountsJob implements ShouldQueue
                     'updated_at' => now(),
                 ]);
 
-                return;
+                return true;
             }
         }
+
+        return false;
+    }
+
+    /**
+     * Check if an email should be filtered out based on rules.
+     */
+    private function shouldFilterEmail(object $email, array $rules): bool
+    {
+        if (empty($rules)) {
+            return false;
+        }
+
+        $fromAddresses = json_decode($email->from, true) ?? [];
+        $senderEmails = array_merge(
+            array_column($fromAddresses, 'address'),
+            $fromAddresses
+        );
+        $senderEmails = array_filter(array_unique($senderEmails), fn ($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+
+        $senderDomains = array_map(fn ($e) => strtolower(explode('@', $e)[1] ?? ''), $senderEmails);
+
+        $hasAllowRule = false;
+        $passesAllow = false;
+
+        foreach ($rules as $rule) {
+            $type = $rule['type'] ?? '';
+            $value = strtolower($rule['value'] ?? '');
+
+            switch ($type) {
+                case 'block_domain':
+                    if (in_array($value, $senderDomains)) {
+                        return true;
+                    }
+                    break;
+
+                case 'block_sender':
+                    if (in_array($value, array_map('strtolower', $senderEmails))) {
+                        return true;
+                    }
+                    break;
+
+                case 'block_subject_pattern':
+                    if ($email->subject && stripos($email->subject, $rule['value']) !== false) {
+                        return true;
+                    }
+                    break;
+
+                case 'allow_domain':
+                    $hasAllowRule = true;
+                    if (in_array($value, $senderDomains)) {
+                        $passesAllow = true;
+                    }
+                    break;
+
+                case 'allow_sender':
+                    $hasAllowRule = true;
+                    if (in_array($value, array_map('strtolower', $senderEmails))) {
+                        $passesAllow = true;
+                    }
+                    break;
+            }
+        }
+
+        // If there are allow rules but none matched, filter out
+        if ($hasAllowRule && ! $passesAllow) {
+            return true;
+        }
+
+        return false;
     }
 }

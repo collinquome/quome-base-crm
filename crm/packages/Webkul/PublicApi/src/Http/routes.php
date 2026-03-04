@@ -239,6 +239,8 @@ Route::prefix('api/v1')->group(function () {
         Route::post('email-accounts/{id}/sync', [EmailSyncController::class, 'sync'])->where('id', '[0-9]+')->name('api.v1.email-accounts.sync');
         Route::get('email-accounts/{id}/status', [EmailSyncController::class, 'syncStatus'])->where('id', '[0-9]+')->name('api.v1.email-accounts.sync-status');
         Route::get('email-accounts/{id}/emails', [EmailSyncController::class, 'emails'])->where('id', '[0-9]+')->name('api.v1.email-accounts.emails');
+        Route::get('email-accounts/{id}/filter-rules', [EmailSyncController::class, 'getFilterRules'])->where('id', '[0-9]+')->name('api.v1.email-accounts.filter-rules');
+        Route::put('email-accounts/{id}/filter-rules', [EmailSyncController::class, 'updateFilterRules'])->where('id', '[0-9]+')->name('api.v1.email-accounts.filter-rules.update');
 
         // VoIP / Click-to-Call
         Route::get('integrations/voip/status', [VoipController::class, 'status'])->name('api.v1.voip.status');
