@@ -20,6 +20,7 @@ use Webkul\PublicApi\Http\Controllers\TagController;
 use Webkul\PublicApi\Http\Controllers\TrashController;
 use Webkul\PublicApi\Http\Controllers\GdprController;
 use Webkul\PublicApi\Http\Controllers\BroadcastController;
+use Webkul\PublicApi\Http\Controllers\BackupController;
 
 Route::prefix('api/v1')->group(function () {
     // Public auth routes
@@ -120,6 +121,12 @@ Route::prefix('api/v1')->group(function () {
         Route::get('gdpr/contacts/{contactId}/export', [GdprController::class, 'export'])->where('contactId', '[0-9]+')->name('api.v1.gdpr.export');
         Route::post('gdpr/contacts/{contactId}/erase', [GdprController::class, 'erase'])->where('contactId', '[0-9]+')->name('api.v1.gdpr.erase');
         Route::get('gdpr/contacts/{contactId}/consent', [GdprController::class, 'consentStatus'])->where('contactId', '[0-9]+')->name('api.v1.gdpr.consent');
+
+        // Backups
+        Route::get('backups', [BackupController::class, 'index'])->name('api.v1.backups.index');
+        Route::post('backups', [BackupController::class, 'store'])->name('api.v1.backups.store');
+        Route::get('backups/{id}', [BackupController::class, 'show'])->where('id', '[0-9]+')->name('api.v1.backups.show');
+        Route::delete('backups/{id}', [BackupController::class, 'destroy'])->where('id', '[0-9]+')->name('api.v1.backups.destroy');
 
         // Broadcasting
         Route::post('broadcast/test', [BroadcastController::class, 'test'])->name('api.v1.broadcast.test');
