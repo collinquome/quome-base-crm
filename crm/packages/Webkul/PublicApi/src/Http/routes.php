@@ -9,6 +9,7 @@ use Webkul\PublicApi\Http\Controllers\PipelineController;
 use Webkul\PublicApi\Http\Controllers\ActionStreamController;
 use Webkul\PublicApi\Http\Controllers\CommentController;
 use Webkul\PublicApi\Http\Controllers\NotificationController;
+use Webkul\PublicApi\Http\Controllers\PipelineAnalyticsController;
 use Webkul\PublicApi\Http\Controllers\TagController;
 use Webkul\PublicApi\Http\Controllers\TrashController;
 
@@ -61,6 +62,11 @@ Route::prefix('api/v1')->group(function () {
         Route::post('comments', [CommentController::class, 'store'])->name('api.v1.comments.store');
         Route::put('comments/{id}', [CommentController::class, 'update'])->name('api.v1.comments.update');
         Route::delete('comments/{id}', [CommentController::class, 'destroy'])->name('api.v1.comments.destroy');
+
+        // Pipeline Analytics
+        Route::get('analytics/forecast', [PipelineAnalyticsController::class, 'forecast'])->name('api.v1.analytics.forecast');
+        Route::get('analytics/velocity', [PipelineAnalyticsController::class, 'velocity'])->name('api.v1.analytics.velocity');
+        Route::get('analytics/summary', [PipelineAnalyticsController::class, 'summary'])->name('api.v1.analytics.summary');
 
         // Trash
         Route::get('trash', [TrashController::class, 'index'])->name('api.v1.trash.index');
