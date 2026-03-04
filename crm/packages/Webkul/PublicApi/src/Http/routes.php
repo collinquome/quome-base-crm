@@ -12,6 +12,7 @@ use Webkul\PublicApi\Http\Controllers\NotificationController;
 use Webkul\PublicApi\Http\Controllers\DashboardController;
 use Webkul\PublicApi\Http\Controllers\PipelineAnalyticsController;
 use Webkul\PublicApi\Http\Controllers\ActivityReportController;
+use Webkul\PublicApi\Http\Controllers\BulkEmailController;
 use Webkul\PublicApi\Http\Controllers\EmailTrackingController;
 use Webkul\PublicApi\Http\Controllers\ScheduledEmailController;
 use Webkul\PublicApi\Http\Controllers\ReportController;
@@ -90,6 +91,10 @@ Route::prefix('api/v1')->group(function () {
         Route::put('reports/{id}', [ReportController::class, 'update'])->name('api.v1.reports.update');
         Route::delete('reports/{id}', [ReportController::class, 'destroy'])->name('api.v1.reports.destroy');
         Route::post('reports/{id}/execute', [ReportController::class, 'executeSaved'])->name('api.v1.reports.execute-saved');
+
+        // Bulk Email
+        Route::post('emails/bulk', [BulkEmailController::class, 'send'])->name('api.v1.emails.bulk');
+        Route::get('emails/bulk/limits', [BulkEmailController::class, 'limits'])->name('api.v1.emails.bulk.limits');
 
         // Email Tracking (specific routes before parameterized)
         Route::post('emails/tracking/generate', [EmailTrackingController::class, 'generateTracking'])->name('api.v1.emails.tracking.generate');
