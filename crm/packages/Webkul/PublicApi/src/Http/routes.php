@@ -31,6 +31,7 @@ use Webkul\PublicApi\Http\Controllers\XeroController;
 use Webkul\PublicApi\Http\Controllers\GoogleCalendarController;
 use Webkul\PublicApi\Http\Controllers\OutlookCalendarController;
 use Webkul\PublicApi\Http\Controllers\VoipController;
+use Webkul\PublicApi\Http\Controllers\EmailSyncController;
 
 Route::prefix('api/v1')->group(function () {
     // Public auth routes
@@ -217,6 +218,17 @@ Route::prefix('api/v1')->group(function () {
         Route::post('integrations/outlook-calendar/disconnect', [OutlookCalendarController::class, 'disconnect'])->name('api.v1.outlook-calendar.disconnect');
         Route::get('integrations/outlook-calendar/events', [OutlookCalendarController::class, 'events'])->name('api.v1.outlook-calendar.events');
         Route::post('integrations/outlook-calendar/sync-activity', [OutlookCalendarController::class, 'syncActivity'])->name('api.v1.outlook-calendar.sync-activity');
+
+        // Email Sync
+        Route::get('email-accounts', [EmailSyncController::class, 'index'])->name('api.v1.email-accounts.index');
+        Route::post('email-accounts', [EmailSyncController::class, 'store'])->name('api.v1.email-accounts.store');
+        Route::get('email-accounts/{id}', [EmailSyncController::class, 'show'])->where('id', '[0-9]+')->name('api.v1.email-accounts.show');
+        Route::put('email-accounts/{id}', [EmailSyncController::class, 'update'])->where('id', '[0-9]+')->name('api.v1.email-accounts.update');
+        Route::delete('email-accounts/{id}', [EmailSyncController::class, 'destroy'])->where('id', '[0-9]+')->name('api.v1.email-accounts.destroy');
+        Route::post('email-accounts/{id}/test', [EmailSyncController::class, 'testConnection'])->where('id', '[0-9]+')->name('api.v1.email-accounts.test');
+        Route::post('email-accounts/{id}/sync', [EmailSyncController::class, 'sync'])->where('id', '[0-9]+')->name('api.v1.email-accounts.sync');
+        Route::get('email-accounts/{id}/status', [EmailSyncController::class, 'syncStatus'])->where('id', '[0-9]+')->name('api.v1.email-accounts.sync-status');
+        Route::get('email-accounts/{id}/emails', [EmailSyncController::class, 'emails'])->where('id', '[0-9]+')->name('api.v1.email-accounts.emails');
 
         // VoIP / Click-to-Call
         Route::get('integrations/voip/status', [VoipController::class, 'status'])->name('api.v1.voip.status');
