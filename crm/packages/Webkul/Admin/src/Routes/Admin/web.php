@@ -46,6 +46,11 @@ require 'action-stream-routes.php';
 require 'quote-routes.php';
 
 /**
+ * Report Builder routes.
+ */
+require 'report-builder-routes.php';
+
+/**
  * Configuration routes.
  */
 require 'configuration-routes.php';
