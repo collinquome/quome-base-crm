@@ -21,6 +21,7 @@ use Webkul\PublicApi\Http\Controllers\TrashController;
 use Webkul\PublicApi\Http\Controllers\GdprController;
 use Webkul\PublicApi\Http\Controllers\BroadcastController;
 use Webkul\PublicApi\Http\Controllers\BackupController;
+use Webkul\PublicApi\Http\Controllers\EmailSequenceController;
 
 Route::prefix('api/v1')->group(function () {
     // Public auth routes
@@ -121,6 +122,17 @@ Route::prefix('api/v1')->group(function () {
         Route::get('gdpr/contacts/{contactId}/export', [GdprController::class, 'export'])->where('contactId', '[0-9]+')->name('api.v1.gdpr.export');
         Route::post('gdpr/contacts/{contactId}/erase', [GdprController::class, 'erase'])->where('contactId', '[0-9]+')->name('api.v1.gdpr.erase');
         Route::get('gdpr/contacts/{contactId}/consent', [GdprController::class, 'consentStatus'])->where('contactId', '[0-9]+')->name('api.v1.gdpr.consent');
+
+        // Email Sequences
+        Route::get('email-sequences', [EmailSequenceController::class, 'index'])->name('api.v1.email-sequences.index');
+        Route::post('email-sequences', [EmailSequenceController::class, 'store'])->name('api.v1.email-sequences.store');
+        Route::get('email-sequences/{id}', [EmailSequenceController::class, 'show'])->where('id', '[0-9]+')->name('api.v1.email-sequences.show');
+        Route::put('email-sequences/{id}', [EmailSequenceController::class, 'update'])->where('id', '[0-9]+')->name('api.v1.email-sequences.update');
+        Route::delete('email-sequences/{id}', [EmailSequenceController::class, 'destroy'])->where('id', '[0-9]+')->name('api.v1.email-sequences.destroy');
+        Route::post('email-sequences/{id}/steps', [EmailSequenceController::class, 'addStep'])->where('id', '[0-9]+')->name('api.v1.email-sequences.add-step');
+        Route::post('email-sequences/{id}/enroll', [EmailSequenceController::class, 'enroll'])->where('id', '[0-9]+')->name('api.v1.email-sequences.enroll');
+        Route::post('email-sequences/{sequenceId}/unenroll/{contactId}', [EmailSequenceController::class, 'unenroll'])->where(['sequenceId' => '[0-9]+', 'contactId' => '[0-9]+'])->name('api.v1.email-sequences.unenroll');
+        Route::get('email-sequences/{id}/performance', [EmailSequenceController::class, 'performance'])->where('id', '[0-9]+')->name('api.v1.email-sequences.performance');
 
         // Backups
         Route::get('backups', [BackupController::class, 'index'])->name('api.v1.backups.index');
