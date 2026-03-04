@@ -9,17 +9,31 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     </head>
 
+    @php
+        $wlEmail = \Webkul\WhiteLabel\Models\WhiteLabelSetting::first();
+        $wlEmailLogo = $wlEmail?->logo_url;
+        $wlEmailAppName = $wlEmail?->app_name ?? config('app.name');
+        $wlEmailPrimaryColor = $wlEmail?->primary_color ?? '#0E90D9';
+    @endphp
     <body style="font-family: inter;">
         <div style="max-width: 640px; margin-left: auto; margin-right: auto;">
             <div style="padding: 30px;">
                 <!-- Email Header -->
                 <div style="margin-bottom: 45px;">
                     <a href="{{ config('app.url') }}">
-                        <img
-                            src="{{ vite()->asset('images/logo.svg') }}"
-                            alt="{{ config('app.name') }}"
-                            style="height: 40px; width: 110px;"
-                        />
+                        @if ($wlEmailLogo)
+                            <img
+                                src="{{ url($wlEmailLogo) }}"
+                                alt="{{ $wlEmailAppName }}"
+                                style="height: 40px; max-width: 200px;"
+                            />
+                        @else
+                            <img
+                                src="{{ vite()->asset('images/logo.svg') }}"
+                                alt="{{ $wlEmailAppName }}"
+                                style="height: 40px; width: 110px;"
+                            />
+                        @endif
                     </a>
                 </div>
 
@@ -28,7 +42,7 @@
 
                 <!-- Email Footer -->
                 <p style="font-size: 16px;color: #202B3C;line-height: 24px;">
-                    @lang('admin::app.emails.common.cheers', ['app_name' => config('app.name')])
+                    @lang('admin::app.emails.common.cheers', ['app_name' => $wlEmailAppName])
                 </p>
             </div>
         </div>
