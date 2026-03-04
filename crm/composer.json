@@ -78,6 +78,7 @@
             "Webkul\\Automation\\": "packages/Webkul/Automation/src",
             "Webkul\\WhiteLabel\\": "packages/Webkul/WhiteLabel/src",
             "Webkul\\ActionStream\\": "packages/Webkul/ActionStream/src",
+            "Webkul\\Notification\\": "packages/Webkul/Notification/src",
             "Webkul\\PublicApi\\": "packages/Webkul/PublicApi/src"
         }
     },

@@ -1,0 +1,12 @@
+{
+    "name": "webkul/notification",
+    "description": "Notifications and Comments package for Krayin CRM",
+    "type": "library",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Notification\\": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}

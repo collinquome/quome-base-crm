@@ -221,6 +221,7 @@ return [
         Webkul\WebForm\Providers\WebFormServiceProvider::class,
         Webkul\WhiteLabel\Providers\WhiteLabelServiceProvider::class,
         Webkul\ActionStream\Providers\ActionStreamServiceProvider::class,
+        Webkul\Notification\Providers\NotificationServiceProvider::class,
         Webkul\PublicApi\Providers\PublicApiServiceProvider::class,
     ])->toArray(),
 

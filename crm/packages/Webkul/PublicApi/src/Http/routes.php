@@ -7,12 +7,14 @@ use Webkul\PublicApi\Http\Controllers\ContactController;
 use Webkul\PublicApi\Http\Controllers\LeadController;
 use Webkul\PublicApi\Http\Controllers\PipelineController;
 use Webkul\PublicApi\Http\Controllers\ActionStreamController;
+use Webkul\PublicApi\Http\Controllers\CommentController;
+use Webkul\PublicApi\Http\Controllers\NotificationController;
 use Webkul\PublicApi\Http\Controllers\TagController;
 
 Route::prefix('api/v1')->group(function () {
     // Public auth routes
     Route::post('auth/login', [AuthController::class, 'login'])
-        ->middleware('throttle:10,1')
+        ->middleware('throttle:30,1')
         ->name('api.v1.auth.login');
 
     // Protected routes
@@ -46,5 +48,17 @@ Route::prefix('api/v1')->group(function () {
         Route::post('action-stream/{id}/complete', [ActionStreamController::class, 'complete'])->name('api.v1.action-stream.complete');
         Route::post('action-stream/{id}/snooze', [ActionStreamController::class, 'snooze'])->name('api.v1.action-stream.snooze');
         Route::delete('action-stream/{id}', [ActionStreamController::class, 'destroy'])->name('api.v1.action-stream.destroy');
+
+        // Notifications
+        Route::get('notifications', [NotificationController::class, 'index'])->name('api.v1.notifications.index');
+        Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('api.v1.notifications.unread-count');
+        Route::put('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('api.v1.notifications.read-all');
+        Route::put('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('api.v1.notifications.read');
+
+        // Comments
+        Route::get('comments', [CommentController::class, 'index'])->name('api.v1.comments.index');
+        Route::post('comments', [CommentController::class, 'store'])->name('api.v1.comments.store');
+        Route::put('comments/{id}', [CommentController::class, 'update'])->name('api.v1.comments.update');
+        Route::delete('comments/{id}', [CommentController::class, 'destroy'])->name('api.v1.comments.destroy');
     });
 });
