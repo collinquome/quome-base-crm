@@ -102,6 +102,58 @@ class NextActionRepository extends BaseRepository
             ->count();
     }
 
+    public function getTeamActions(array $userIds, array $filters = [])
+    {
+        $query = $this->model->whereIn('user_id', $userIds)
+            ->with(['actionable', 'user']);
+
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        } else {
+            $query->where('status', 'pending');
+        }
+
+        if (! empty($filters['user_id'])) {
+            $query->where('user_id', $filters['user_id']);
+        }
+
+        if (! empty($filters['action_type'])) {
+            $query->where('action_type', $filters['action_type']);
+        }
+
+        if (! empty($filters['priority'])) {
+            $query->where('priority', $filters['priority']);
+        }
+
+        if (! empty($filters['due_from'])) {
+            $query->where('due_date', '>=', $filters['due_from']);
+        }
+
+        if (! empty($filters['due_to'])) {
+            $query->where('due_date', '<=', $filters['due_to']);
+        }
+
+        return $query->orderByRaw("
+            CASE
+                WHEN due_date IS NOT NULL AND due_date < CURDATE() THEN 0
+                WHEN due_date = CURDATE() THEN 1
+                WHEN due_date IS NOT NULL THEN 2
+                ELSE 3
+            END ASC
+        ")
+        ->orderByRaw("
+            CASE priority
+                WHEN 'urgent' THEN 0
+                WHEN 'high' THEN 1
+                WHEN 'normal' THEN 2
+                WHEN 'low' THEN 3
+                ELSE 4
+            END ASC
+        ")
+        ->orderBy('due_date', 'asc')
+        ->orderBy('created_at', 'asc');
+    }
+
     public function getForEntity(string $entityType, int $entityId)
     {
         return $this->model

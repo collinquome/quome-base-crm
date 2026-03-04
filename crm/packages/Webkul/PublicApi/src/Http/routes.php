@@ -76,6 +76,10 @@ Route::prefix('api/v1')->group(function () {
         Route::post('action-stream/{id}/snooze', [ActionStreamController::class, 'snooze'])->name('api.v1.action-stream.snooze');
         Route::delete('action-stream/{id}', [ActionStreamController::class, 'destroy'])->name('api.v1.action-stream.destroy');
 
+        // Team Stream
+        Route::get('team-stream', [ActionStreamController::class, 'teamStream'])->name('api.v1.team-stream.index');
+        Route::get('team-stream/members', [ActionStreamController::class, 'teamMembers'])->name('api.v1.team-stream.members');
+
         // Notifications
         Route::get('notifications', [NotificationController::class, 'index'])->name('api.v1.notifications.index');
         Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('api.v1.notifications.unread-count');

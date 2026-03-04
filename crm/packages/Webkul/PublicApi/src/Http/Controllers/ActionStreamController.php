@@ -6,11 +6,13 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Webkul\ActionStream\Repositories\NextActionRepository;
+use Webkul\User\Repositories\UserRepository;
 
 class ActionStreamController extends Controller
 {
     public function __construct(
-        protected NextActionRepository $nextActionRepository
+        protected NextActionRepository $nextActionRepository,
+        protected UserRepository $userRepository
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -96,6 +98,30 @@ class ActionStreamController extends Controller
         $this->nextActionRepository->delete($id);
 
         return response()->json(['message' => 'Next action deleted.']);
+    }
+
+    public function teamStream(Request $request): JsonResponse
+    {
+        $filters = $request->only(['action_type', 'priority', 'due_from', 'due_to', 'user_id', 'status']);
+
+        // Get all active user IDs
+        $userIds = $this->userRepository->findWhere([['status', '=', 1]])->pluck('id')->toArray();
+
+        if (empty($userIds)) {
+            $userIds = [$request->user()->id];
+        }
+
+        $query = $this->nextActionRepository->getTeamActions($userIds, $filters);
+        $perPage = min((int) $request->get('per_page', 15), 100);
+
+        return response()->json($query->paginate($perPage));
+    }
+
+    public function teamMembers(Request $request): JsonResponse
+    {
+        $users = $this->userRepository->findWhere([['status', '=', 1]], ['id', 'name', 'email']);
+
+        return response()->json(['data' => $users]);
     }
 
     public function overdueCount(Request $request): JsonResponse
