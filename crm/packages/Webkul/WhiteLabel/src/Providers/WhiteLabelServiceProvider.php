@@ -14,6 +14,13 @@ class WhiteLabelServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__.'/../Http/routes.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'white-label');
 
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \Webkul\WhiteLabel\Console\Commands\ApplyBrand::class,
+                \Webkul\WhiteLabel\Console\Commands\ResetBrand::class,
+            ]);
+        }
+
         // Share white label settings with all views
         View::composer('*', function ($view) {
             try {

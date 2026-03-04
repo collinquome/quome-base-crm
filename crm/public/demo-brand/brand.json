@@ -1,0 +1,11 @@
+{
+  "app_name": "NovaCRM",
+  "primary_color": "#0891B2",
+  "secondary_color": "#0E7490",
+  "accent_color": "#F59E0B",
+  "email_sender_name": "NovaCRM",
+  "support_url": "https://novacrm.example.com/support",
+  "logo": "demo-brand/logo.png",
+  "logo_dark": "demo-brand/logo-dark.png",
+  "favicon": "demo-brand/favicon.png"
+}
