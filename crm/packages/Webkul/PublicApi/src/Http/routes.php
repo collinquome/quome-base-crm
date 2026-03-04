@@ -34,6 +34,7 @@ use Webkul\PublicApi\Http\Controllers\VoipController;
 use Webkul\PublicApi\Http\Controllers\EmailSyncController;
 use Webkul\PublicApi\Http\Controllers\SharedInboxController;
 use Webkul\PublicApi\Http\Controllers\WebhookController;
+use Webkul\PublicApi\Http\Controllers\SpeedDialController;
 
 Route::prefix('api/v1')->group(function () {
     // Public auth routes
@@ -271,6 +272,13 @@ Route::prefix('api/v1')->group(function () {
         Route::get('webhooks/{id}', [WebhookController::class, 'show'])->where('id', '[0-9]+')->name('api.v1.webhooks.show');
         Route::get('webhooks/events', [WebhookController::class, 'events'])->name('api.v1.webhooks.events');
         Route::post('webhooks/{id}/test', [WebhookController::class, 'test'])->where('id', '[0-9]+')->name('api.v1.webhooks.test');
+
+        // Speed Dial
+        Route::get('speed-dial', [SpeedDialController::class, 'index'])->name('api.v1.speed-dial.index');
+        Route::post('speed-dial/favorites', [SpeedDialController::class, 'addFavorite'])->name('api.v1.speed-dial.add-favorite');
+        Route::delete('speed-dial/favorites/{personId}', [SpeedDialController::class, 'removeFavorite'])->where('personId', '[0-9]+')->name('api.v1.speed-dial.remove-favorite');
+        Route::put('speed-dial/reorder', [SpeedDialController::class, 'reorder'])->name('api.v1.speed-dial.reorder');
+        Route::post('speed-dial/quick-call/{personId}', [SpeedDialController::class, 'quickCall'])->where('personId', '[0-9]+')->name('api.v1.speed-dial.quick-call');
 
         // Trash
         Route::get('trash', [TrashController::class, 'index'])->name('api.v1.trash.index');
