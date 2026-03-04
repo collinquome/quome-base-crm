@@ -2,36 +2,59 @@
 
 return [
     /**
-     * Dashboard.
+     * Action Stream (default landing page).
      */
     [
-        'key'        => 'dashboard',
-        'name'       => 'admin::app.layouts.dashboard',
-        'route'      => 'admin.dashboard.index',
+        'key'        => 'action-stream',
+        'name'       => 'Action Stream',
+        'route'      => 'admin.action-stream.index',
         'sort'       => 1,
-        'icon-class' => 'icon-dashboard',
+        'icon-class' => 'icon-activity',
     ],
 
     /**
-     * Leads.
+     * Contacts.
+     */
+    [
+        'key'        => 'contacts',
+        'name'       => 'admin::app.layouts.contacts',
+        'route'      => 'admin.contacts.persons.index',
+        'sort'       => 2,
+        'icon-class' => 'icon-contact',
+    ], [
+        'key'        => 'contacts.persons',
+        'name'       => 'admin::app.layouts.persons',
+        'route'      => 'admin.contacts.persons.index',
+        'sort'       => 1,
+        'icon-class' => '',
+    ], [
+        'key'        => 'contacts.organizations',
+        'name'       => 'admin::app.layouts.organizations',
+        'route'      => 'admin.contacts.organizations.index',
+        'sort'       => 2,
+        'icon-class' => '',
+    ],
+
+    /**
+     * Leads / Deals.
      */
     [
         'key'        => 'leads',
         'name'       => 'admin::app.layouts.leads',
         'route'      => 'admin.leads.index',
-        'sort'       => 2,
+        'sort'       => 3,
         'icon-class' => 'icon-leads',
     ],
 
     /**
-     * Quotes.
+     * Activities.
      */
     [
-        'key'        => 'quotes',
-        'name'       => 'admin::app.layouts.quotes',
-        'route'      => 'admin.quotes.index',
-        'sort'       => 3,
-        'icon-class' => 'icon-quote',
+        'key'        => 'activities',
+        'name'       => 'admin::app.layouts.activities',
+        'route'      => 'admin.activities.index',
+        'sort'       => 4,
+        'icon-class' => 'icon-activity',
     ],
 
     /**
@@ -42,7 +65,7 @@ return [
         'name'       => 'admin::app.layouts.mail.title',
         'route'      => 'admin.mail.index',
         'params'     => ['route' => 'inbox'],
-        'sort'       => 4,
+        'sort'       => 5,
         'icon-class' => 'icon-mail',
     ], [
         'key'        => 'mail.inbox',
@@ -88,48 +111,14 @@ return [
     ],
 
     /**
-     * Activities.
+     * Quotes.
      */
     [
-        'key'        => 'activities',
-        'name'       => 'admin::app.layouts.activities',
-        'route'      => 'admin.activities.index',
-        'sort'       => 5,
-        'icon-class' => 'icon-activity',
-    ],
-
-    /**
-     * Action Stream.
-     */
-    [
-        'key'        => 'action-stream',
-        'name'       => 'Action Stream',
-        'route'      => 'admin.action-stream.index',
+        'key'        => 'quotes',
+        'name'       => 'admin::app.layouts.quotes',
+        'route'      => 'admin.quotes.index',
         'sort'       => 6,
-        'icon-class' => 'icon-activity',
-    ],
-
-    /**
-     * Contacts.
-     */
-    [
-        'key'        => 'contacts',
-        'name'       => 'admin::app.layouts.contacts',
-        'route'      => 'admin.contacts.persons.index',
-        'sort'       => 7,
-        'icon-class' => 'icon-contact',
-    ], [
-        'key'        => 'contacts.persons',
-        'name'       => 'admin::app.layouts.persons',
-        'route'      => 'admin.contacts.persons.index',
-        'sort'       => 1,
-        'icon-class' => '',
-    ], [
-        'key'        => 'contacts.organizations',
-        'name'       => 'admin::app.layouts.organizations',
-        'route'      => 'admin.contacts.organizations.index',
-        'sort'       => 2,
-        'icon-class' => '',
+        'icon-class' => 'icon-quote',
     ],
 
     /**
@@ -144,13 +133,24 @@ return [
     ],
 
     /**
+     * Dashboard.
+     */
+    [
+        'key'        => 'dashboard',
+        'name'       => 'admin::app.layouts.dashboard',
+        'route'      => 'admin.dashboard.index',
+        'sort'       => 8,
+        'icon-class' => 'icon-dashboard',
+    ],
+
+    /**
      * Settings.
      */
     [
         'key'        => 'settings',
         'name'       => 'admin::app.layouts.settings',
         'route'      => 'admin.settings.index',
-        'sort'       => 8,
+        'sort'       => 9,
         'icon-class' => 'icon-setting',
     ], [
         'key'        => 'settings.user',
@@ -302,7 +302,7 @@ return [
         'key'        => 'configuration',
         'name'       => 'admin::app.layouts.configuration',
         'route'      => 'admin.configuration.index',
-        'sort'       => 9,
+        'sort'       => 10,
         'icon-class' => 'icon-configuration',
     ],
 
