@@ -176,75 +176,51 @@ test.describe('Color-Coded Priority - API Creates with Priority', () => {
   });
 });
 
-test.describe('Color-Coded Priority - Contact View Urgency Indicator', () => {
-  test('contact detail page has urgency indicator component', async ({ page }) => {
+test.describe('Color-Coded Priority - Contact View Urgency Widget', () => {
+  test('contact detail page has next action widget', async ({ page }) => {
     await loginPage(page);
-
-    // Navigate to contacts, click first contact
-    await page.goto(`${BASE}/admin/contacts/persons`);
+    await page.goto(`${BASE}/admin/contacts/persons/view/1`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    // Try to find and click a contact to view their detail page
-    const contactLinks = page.locator('.table-responsive a[href*="/persons/view/"], a[href*="/contacts/persons/view/"]');
-    const linkCount = await contactLinks.count();
-
-    if (linkCount > 0) {
-      await contactLinks.first().click();
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(2000);
-
-      // Urgency indicator should be present (either with an action or empty state)
-      const indicator = page.locator('[data-testid="urgency-indicator"]');
-      await expect(indicator).toBeVisible();
-    } else {
-      // Navigate directly to a known contact if available
-      await page.goto(`${BASE}/admin/contacts/persons/view/1`);
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(2000);
-
-      const indicator = page.locator('[data-testid="urgency-indicator"]');
-      const visible = await indicator.isVisible().catch(() => false);
-      // If person id 1 exists, indicator should be visible
-      expect(visible || page.url().includes('login')).toBeTruthy();
+    if (page.url().includes('/persons/view/')) {
+      const widget = page.locator('[data-testid="next-action-widget"]');
+      await expect(widget).toBeVisible();
     }
   });
 
-  test('urgency indicator shows card or empty state', async ({ page }) => {
+  test('widget shows urgency indicator or empty state', async ({ page }) => {
     await loginPage(page);
     await page.goto(`${BASE}/admin/contacts/persons/view/1`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
-    // Check if we're on the contact page (not redirected to login)
     if (page.url().includes('/persons/view/')) {
-      // The urgency indicator renders either a colored card with action details
-      // or a "No next action set" empty state
-      const indicator = page.locator('[data-testid="urgency-indicator"]');
-      await expect(indicator).toBeVisible();
+      const widget = page.locator('[data-testid="next-action-widget"]');
+      await expect(widget).toBeVisible();
 
-      // Check for either urgency content or "No next action set" text
-      const hasAction = await indicator.locator('text=Overdue, text=Due Today, text=This Week, text=Upcoming, text=No Due Date').first().isVisible().catch(() => false);
-      const hasEmpty = await indicator.locator('text=No next action set').isVisible().catch(() => false);
+      // Should show either a current action or "No next action set"
+      const current = widget.locator('[data-testid="next-action-current"]');
+      const empty = widget.locator('[data-testid="next-action-empty"]');
+
+      const hasAction = await current.isVisible().catch(() => false);
+      const hasEmpty = await empty.isVisible().catch(() => false);
 
       expect(hasAction || hasEmpty).toBeTruthy();
     }
   });
 });
 
-test.describe('Color-Coded Priority - Lead View Urgency Indicator', () => {
-  test('lead detail page has urgency indicator component', async ({ page }) => {
+test.describe('Color-Coded Priority - Lead View Urgency Widget', () => {
+  test('lead detail page has next action widget', async ({ page }) => {
     await loginPage(page);
-
-    // Navigate to leads
     await page.goto(`${BASE}/admin/leads/view/1`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    // If lead 1 exists
     if (page.url().includes('/leads/view/')) {
-      const indicator = page.locator('[data-testid="urgency-indicator"]');
-      const visible = await indicator.isVisible().catch(() => false);
+      const widget = page.locator('[data-testid="next-action-widget"]');
+      const visible = await widget.isVisible().catch(() => false);
       expect(visible).toBeTruthy();
     }
   });

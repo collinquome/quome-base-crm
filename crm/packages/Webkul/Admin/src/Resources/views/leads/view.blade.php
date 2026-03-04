@@ -52,8 +52,8 @@
 
                 {!! view_render_event('admin.leads.view.title.after', ['lead' => $lead]) !!}
 
-                <!-- Next Action Urgency Indicator -->
-                <x-admin::urgency-indicator
+                <!-- Next Action Widget -->
+                <x-admin::next-action-widget
                     entity-type="lead"
                     :entity-id="$lead->id"
                 />

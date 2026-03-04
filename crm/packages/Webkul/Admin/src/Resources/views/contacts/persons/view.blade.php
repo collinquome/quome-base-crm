@@ -46,8 +46,8 @@
                     {!! view_render_event('admin.contact.persons.view.title.after', ['person' => $person]) !!}
                 </div>
                 
-                <!-- Next Action Urgency Indicator -->
-                <x-admin::urgency-indicator
+                <!-- Next Action Widget -->
+                <x-admin::next-action-widget
                     entity-type="person"
                     :entity-id="$person->id"
                 />
