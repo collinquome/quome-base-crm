@@ -36,6 +36,11 @@ require 'contacts-routes.php';
 require 'activities-routes.php';
 
 /**
+ * Action Stream routes.
+ */
+require 'action-stream-routes.php';
+
+/**
  * Quotes routes.
  */
 require 'quote-routes.php';

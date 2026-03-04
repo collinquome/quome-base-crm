@@ -100,13 +100,24 @@ return [
     ],
 
     /**
+     * Action Stream.
+     */
+    [
+        'key'        => 'action-stream',
+        'name'       => 'Action Stream',
+        'route'      => 'admin.action-stream.index',
+        'sort'       => 6,
+        'icon-class' => 'icon-activity',
+    ],
+
+    /**
      * Contacts.
      */
     [
         'key'        => 'contacts',
         'name'       => 'admin::app.layouts.contacts',
         'route'      => 'admin.contacts.persons.index',
-        'sort'       => 6,
+        'sort'       => 7,
         'icon-class' => 'icon-contact',
     ], [
         'key'        => 'contacts.persons',
