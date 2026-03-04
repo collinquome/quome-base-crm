@@ -110,6 +110,12 @@ Route::prefix('api/v1')->group(function () {
         Route::delete('reports/{id}', [ReportController::class, 'destroy'])->name('api.v1.reports.destroy');
         Route::post('reports/{id}/execute', [ReportController::class, 'executeSaved'])->name('api.v1.reports.execute-saved');
 
+        // Report Schedules
+        Route::get('reports/{id}/schedules', [ReportController::class, 'schedules'])->name('api.v1.reports.schedules.index');
+        Route::post('reports/{id}/schedules', [ReportController::class, 'createSchedule'])->name('api.v1.reports.schedules.store');
+        Route::put('reports/{reportId}/schedules/{scheduleId}', [ReportController::class, 'updateSchedule'])->name('api.v1.reports.schedules.update');
+        Route::delete('reports/{reportId}/schedules/{scheduleId}', [ReportController::class, 'deleteSchedule'])->name('api.v1.reports.schedules.destroy');
+
         // Bulk Email
         Route::post('emails/bulk', [BulkEmailController::class, 'send'])->name('api.v1.emails.bulk');
         Route::get('emails/bulk/limits', [BulkEmailController::class, 'limits'])->name('api.v1.emails.bulk.limits');
