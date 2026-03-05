@@ -140,21 +140,43 @@ else
     php artisan migrate --force 2>&1 || true
 fi
 
-# Seed white-label defaults if not present
-php artisan tinker --execute="
-    if (\Schema::hasTable('white_label_settings') && \DB::table('white_label_settings')->count() === 0) {
-        \DB::table('white_label_settings')->insert([
-            'app_name' => 'CRM',
-            'primary_color' => '#1E40AF',
-            'secondary_color' => '#7C3AED',
-            'accent_color' => '#F59E0B',
-            'email_sender_name' => 'CRM',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        echo 'White label defaults seeded.';
-    }
-" 2>/dev/null || true
+# Apply demo brand if brand.json exists and white-label not yet configured
+if [ -f "public/demo-brand/brand.json" ]; then
+    php artisan brand:apply public/demo-brand/brand.json 2>/dev/null || \
+    php artisan tinker --execute="
+        if (\Schema::hasTable('white_label_settings')) {
+            \DB::table('white_label_settings')->updateOrInsert(
+                ['id' => 1],
+                [
+                    'app_name' => 'NovaCRM',
+                    'primary_color' => '#0891B2',
+                    'secondary_color' => '#0E7490',
+                    'accent_color' => '#F59E0B',
+                    'email_sender_name' => 'NovaCRM',
+                    'logo_url' => '/demo-brand/logo.png',
+                    'logo_dark_url' => '/demo-brand/logo-dark.png',
+                    'updated_at' => now(),
+                ]
+            );
+            echo 'White label brand applied with logo.';
+        }
+    " 2>/dev/null || true
+else
+    php artisan tinker --execute="
+        if (\Schema::hasTable('white_label_settings') && \DB::table('white_label_settings')->count() === 0) {
+            \DB::table('white_label_settings')->insert([
+                'app_name' => 'CRM',
+                'primary_color' => '#1E40AF',
+                'secondary_color' => '#7C3AED',
+                'accent_color' => '#F59E0B',
+                'email_sender_name' => 'CRM',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            echo 'White label defaults seeded.';
+        }
+    " 2>/dev/null || true
+fi
 
 # Storage link and permissions
 php artisan storage:link 2>/dev/null || true
