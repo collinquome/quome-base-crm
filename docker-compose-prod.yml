@@ -1,0 +1,58 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: quome_crm_prod_app
+    restart: unless-stopped
+    ports:
+      - "8290:80"
+    environment:
+      APP_NAME: "Krayin CRM"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: "http://localhost:8290"
+      APP_TIMEZONE: UTC
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_DATABASE: krayin_crm
+      DB_USERNAME: krayin
+      DB_PASSWORD: secret
+      MAIL_MAILER: log
+      BROADCAST_DRIVER: log
+    volumes:
+      - prod_storage:/var/www/html/storage
+    networks:
+      - quome_crm_prod
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    container_name: quome_crm_prod_db
+    restart: unless-stopped
+    ports:
+      - "13317:3306"
+    environment:
+      MYSQL_DATABASE: krayin_crm
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: krayin
+      MYSQL_PASSWORD: secret
+    volumes:
+      - quome_crm_prod_dbdata:/var/lib/mysql
+    networks:
+      - quome_crm_prod
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-psecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  quome_crm_prod_dbdata:
+  prod_storage:
+
+networks:
+  quome_crm_prod:
+    driver: bridge

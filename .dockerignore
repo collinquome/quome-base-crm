@@ -1,0 +1,14 @@
+crm/vendor
+crm/node_modules
+crm/.env
+node_modules
+.git
+test-results
+playwright-report
+tests
+docs
+extension
+make-com
+mobile
+zapier
+*.md
