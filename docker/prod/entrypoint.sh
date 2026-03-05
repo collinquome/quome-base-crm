@@ -1,20 +1,63 @@
 #!/bin/bash
 set -e
 
-echo "Starting Krayin CRM (production) setup..."
+echo "Starting Quome CRM (production) setup..."
 
 cd /var/www/html
+
+# Railway support: parse MYSQL_URL if provided (Railway MySQL plugin)
+if [ -n "$MYSQL_URL" ] && [ -z "$DB_HOST" ]; then
+    echo "Parsing MYSQL_URL from Railway..."
+    DB_HOST=$(echo "$MYSQL_URL" | sed -n 's|.*@\([^:]*\):.*|\1|p')
+    DB_PORT=$(echo "$MYSQL_URL" | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+    DB_DATABASE=$(echo "$MYSQL_URL" | sed -n 's|.*/\([^?]*\).*|\1|p')
+    DB_USERNAME=$(echo "$MYSQL_URL" | sed -n 's|mysql://\([^:]*\):.*|\1|p')
+    DB_PASSWORD=$(echo "$MYSQL_URL" | sed -n 's|mysql://[^:]*:\([^@]*\)@.*|\1|p')
+    export DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD
+fi
+
+# Railway also provides MYSQLHOST etc. as individual vars
+if [ -n "$MYSQLHOST" ] && [ -z "$DB_HOST" ]; then
+    DB_HOST="$MYSQLHOST"
+    DB_PORT="${MYSQLPORT:-3306}"
+    DB_DATABASE="${MYSQLDATABASE:-railway}"
+    DB_USERNAME="${MYSQLUSER:-root}"
+    DB_PASSWORD="${MYSQLPASSWORD:-}"
+    export DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD
+fi
+
+# Remove default nginx site config (may survive Docker layer caching)
+rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
+
+# Railway support: update nginx to listen on $PORT if set
+if [ -n "$PORT" ]; then
+    echo "Railway PORT detected: $PORT — updating nginx..."
+    sed -i "s/listen 80 default_server;/listen $PORT default_server;/" /etc/nginx/conf.d/app.conf
+fi
+
+# Ensure storage directory structure exists (volume mount may be empty)
+mkdir -p storage/framework/{sessions,views,cache}
+mkdir -p storage/logs
+mkdir -p bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
 # Clear cached bootstrap files that may reference dev-only packages
 rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php
 
+# Compute APP_URL: explicit > Railway domain > fallback
+if [ -z "$APP_URL" ] && [ -n "$RAILWAY_PUBLIC_DOMAIN" ]; then
+    APP_URL="https://$RAILWAY_PUBLIC_DOMAIN"
+fi
+APP_URL="${APP_URL:-http://localhost}"
+
 # Generate .env from environment variables
 cat > .env <<ENVEOF
-APP_NAME="${APP_NAME:-Krayin CRM}"
+APP_NAME="${APP_NAME:-Quome CRM}"
 APP_ENV=${APP_ENV:-production}
 APP_KEY=${APP_KEY:-}
 APP_DEBUG=${APP_DEBUG:-false}
-APP_URL=${APP_URL:-http://localhost}
+APP_URL=${APP_URL}
 APP_TIMEZONE=${APP_TIMEZONE:-UTC}
 APP_LOCALE=${APP_LOCALE:-en}
 APP_CURRENCY=${APP_CURRENCY:-USD}
@@ -25,8 +68,8 @@ LOG_LEVEL=${LOG_LEVEL:-warning}
 DB_CONNECTION=mysql
 DB_HOST=${DB_HOST:-db}
 DB_PORT=${DB_PORT:-3306}
-DB_DATABASE=${DB_DATABASE:-krayin_crm}
-DB_USERNAME=${DB_USERNAME:-krayin}
+DB_DATABASE=${DB_DATABASE:-quome_crm}
+DB_USERNAME=${DB_USERNAME:-quome}
 DB_PASSWORD=${DB_PASSWORD:-secret}
 DB_PREFIX=
 
@@ -36,9 +79,9 @@ QUEUE_CONNECTION=redis
 SESSION_DRIVER=redis
 SESSION_LIFETIME=120
 
-REDIS_HOST=127.0.0.1
-REDIS_PASSWORD=null
-REDIS_PORT=6379
+REDIS_HOST=${REDIS_HOST:-127.0.0.1}
+REDIS_PASSWORD=${REDIS_PASSWORD:-null}
+REDIS_PORT=${REDIS_PORT:-6379}
 
 MAIL_MAILER=${MAIL_MAILER:-smtp}
 MAIL_HOST=${MAIL_HOST:-localhost}
@@ -47,7 +90,7 @@ MAIL_USERNAME=${MAIL_USERNAME:-null}
 MAIL_PASSWORD=${MAIL_PASSWORD:-null}
 MAIL_ENCRYPTION=${MAIL_ENCRYPTION:-null}
 MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@example.com}
-MAIL_FROM_NAME="${MAIL_FROM_NAME:-Krayin CRM}"
+MAIL_FROM_NAME="${MAIL_FROM_NAME:-Quome CRM}"
 ENVEOF
 
 # Generate APP_KEY if not set
@@ -124,7 +167,7 @@ php artisan route:cache 2>/dev/null || true
 php artisan view:cache 2>/dev/null || true
 
 echo "============================================"
-echo "  Krayin CRM (prod) is ready!"
+echo "  Quome CRM (prod) is ready!"
 echo "  URL: ${APP_URL:-http://localhost}"
 echo "  Login: admin@example.com / admin123"
 echo "============================================"

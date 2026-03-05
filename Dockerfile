@@ -1,5 +1,5 @@
 # =============================================================================
-# Unified production Dockerfile for Krayin CRM
+# Unified production Dockerfile for Quome CRM
 # Runs: nginx + php-fpm + redis + queue worker + scheduler via supervisord
 # Requires: external MySQL database (provided via env vars)
 # =============================================================================
@@ -8,7 +8,7 @@
 FROM node:18-alpine AS frontend
 WORKDIR /build
 COPY crm/package.json crm/package-lock.json* ./
-RUN npm ci --no-audit
+RUN npm install --no-audit
 COPY crm/ ./
 RUN npm run build
 
@@ -61,9 +61,9 @@ RUN apt-get update && apt-get install -y \
 # PHP config
 COPY docker/php/local.ini /usr/local/etc/php/conf.d/local.ini
 
-# Nginx config (modified for local php-fpm)
-COPY docker/prod/nginx.conf /etc/nginx/conf.d/default.conf
-RUN rm -f /etc/nginx/sites-enabled/default
+# Nginx config — remove ALL default configs to avoid conflicts
+RUN rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default /etc/nginx/conf.d/default.conf
+COPY docker/prod/nginx.conf /etc/nginx/conf.d/app.conf
 
 # Supervisor config
 COPY docker/prod/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
