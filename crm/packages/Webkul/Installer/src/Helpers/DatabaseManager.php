@@ -6,7 +6,7 @@ use Exception;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Webkul\Installer\Database\Seeders\DatabaseSeeder as KrayinDatabaseSeeder;
+use Webkul\Installer\Database\Seeders\DatabaseSeeder as QuomeDatabaseSeeder;
 
 class DatabaseManager
 {
@@ -75,7 +75,7 @@ class DatabaseManager
     public function seeder($data)
     {
         try {
-            app(KrayinDatabaseSeeder::class)->run([
+            app(QuomeDatabaseSeeder::class)->run([
                 'default_locale'     => $data['parameter']['default_locales'],
                 'default_currency'   => $data['parameter']['default_currency'],
             ]);

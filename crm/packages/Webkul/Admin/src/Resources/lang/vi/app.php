@@ -330,7 +330,7 @@ return [
         ],
         'layouts' => [
             'powered-by' => [
-                'description' => 'Được hỗ trợ bởi :krayin, một dự án mã nguồn mở được phát triển bởi :webkul.',
+                'description' => 'Được hỗ trợ bởi :quome, một dự án mã nguồn mở được phát triển bởi :webkul.',
             ],
             'header' => [
                 'mega-search' => [

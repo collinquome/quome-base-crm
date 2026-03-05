@@ -10,11 +10,11 @@ use Webkul\Core\Repositories\CountryStateRepository;
 class Core
 {
     /**
-     * The Krayin version.
+     * The Quome version.
      *
      * @var string
      */
-    const KRAYIN_VERSION = '2.1.6';
+    const QUOME_VERSION = '2.1.6';
 
     /**
      * Create a new instance.
@@ -28,13 +28,13 @@ class Core
     ) {}
 
     /**
-     * Get the version number of the Krayin.
+     * Get the version number of the Quome.
      *
      * @return string
      */
     public function version()
     {
-        return static::KRAYIN_VERSION;
+        return static::QUOME_VERSION;
     }
 
     /**

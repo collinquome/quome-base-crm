@@ -12,7 +12,7 @@ class Installer
      *
      * @var string
      */
-    protected const API_ENDPOINT = 'https://updates.krayincrm.com/api/updates';
+    protected const API_ENDPOINT = 'https://updates.quomecrm.com/api/updates';
 
     /**
      * Create a new listener instance.
@@ -22,7 +22,7 @@ class Installer
     public function __construct(protected UserRepository $userRepository) {}
 
     /**
-     * After Krayin is successfully installed
+     * After Quome is successfully installed
      *
      * @return void
      */

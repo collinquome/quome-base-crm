@@ -16,6 +16,6 @@ return new class extends Migration
     {
         DB::table('core_config')
             ->where('code', 'general.settings.footer.label')
-            ->update(['value' => 'Powered by <span style="color: rgb(14, 144, 217);"><a href="http://www.krayincrm.com" target="_blank">Krayin</a></span>, an open-source project by <span style="color: rgb(14, 144, 217);"><a href="https://webkul.com" target="_blank">Webkul</a></span>.']);
+            ->update(['value' => 'Powered by <span style="color: rgb(14, 144, 217);"><a href="http://www.quomecrm.com" target="_blank">Quome</a></span>, an open-source project by <span style="color: rgb(14, 144, 217);"><a href="https://webkul.com" target="_blank">Webkul</a></span>.']);
     }
 };

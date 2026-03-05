@@ -367,7 +367,7 @@ return [
 
         'layouts' => [
             'powered-by' => [
-                'description' => 'Powered by :krayin, an open-source project by :webkul.',
+                'description' => 'Powered by :quome, an open-source project by :webkul.',
             ],
 
             'header' => [

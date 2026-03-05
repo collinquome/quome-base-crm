@@ -120,7 +120,7 @@ return [
         'index' => [
             'create-administrator' => [
                 'admin'            => 'مدير',
-                'krayin'           => 'Krayin',
+                'quome'           => 'Quome',
                 'confirm-password' => 'تأكيد كلمة المرور',
                 'email'            => 'البريد الإلكتروني',
                 'email-address'    => 'admin@example.com',
@@ -135,7 +135,7 @@ return [
                 'application-name'            => 'اسم التطبيق',
                 'argentine-peso'              => 'البيزو الأرجنتيني (ARS)',
                 'australian-dollar'           => 'الدولار الأسترالي (AUD)',
-                'krayin'                      => 'Krayin',
+                'quome'                      => 'Quome',
                 'bangladeshi-taka'            => 'التاكا البنغلاديشي (BDT)',
                 'brazilian-real'              => 'الريال البرازيلي (BRL)',
                 'british-pound-sterling'      => 'الجنيه الإسترليني البريطاني (GBP)',
@@ -218,24 +218,24 @@ return [
             ],
 
             'installation-processing' => [
-                'krayin'       => 'تثبيت Krayin',
-                'krayin-info'  => 'إنشاء جداول قاعدة البيانات، وقد يستغرق ذلك بضع دقائق',
+                'quome'       => 'تثبيت Quome',
+                'quome-info'  => 'إنشاء جداول قاعدة البيانات، وقد يستغرق ذلك بضع دقائق',
                 'title'        => 'التثبيت',
             ],
 
             'installation-completed' => [
                 'admin-panel'                => 'لوحة المشرف',
-                'krayin-forums'              => 'منتديات Krayin',
+                'quome-forums'              => 'منتديات Quome',
                 'customer-panel'             => 'لوحة العميل',
-                'explore-krayin-extensions'  => 'استكشاف امتدادات Krayin',
+                'explore-quome-extensions'  => 'استكشاف امتدادات Quome',
                 'title'                      => 'اكتمال التثبيت',
-                'title-info'                 => 'تم تثبيت Krayin بنجاح على نظامك.',
+                'title-info'                 => 'تم تثبيت Quome بنجاح على نظامك.',
             ],
 
             'ready-for-installation' => [
                 'create-databsae-table'   => 'إنشاء جدول قاعدة البيانات',
                 'install'                 => 'التثبيت',
-                'install-info'            => 'Krayin للتثبيت',
+                'install-info'            => 'Quome للتثبيت',
                 'install-info-button'     => 'انقر على الزر أدناه ل',
                 'populate-database-table' => 'ملء جداول قاعدة البيانات',
                 'start-installation'      => 'بدء التثبيت',
@@ -246,8 +246,8 @@ return [
                 'locale'        => 'اللغة',
                 'main'          => 'بداية',
                 'select-locale' => 'اختر اللغة',
-                'title'         => 'تثبيت Krayin الخاص بك',
-                'welcome-title' => 'مرحبًا بك في Krayin',
+                'title'         => 'تثبيت Quome الخاص بك',
+                'welcome-title' => 'مرحبًا بك في Quome',
             ],
 
             'server-requirements' => [
@@ -274,15 +274,15 @@ return [
             ],
 
             'back'                     => 'رجوع',
-            'krayin'                   => 'Krayin',
-            'krayin-info'              => 'مشروع مجتمعي من قبل',
-            'krayin-logo'              => 'شعار Krayin',
+            'quome'                   => 'Quome',
+            'quome-info'              => 'مشروع مجتمعي من قبل',
+            'quome-logo'              => 'شعار Quome',
             'continue'                 => 'متابعة',
-            'installation-description' => 'عادة ما تتضمن عملية تثبيت Krayin عدة خطوات. إليك نظرة عامة عامة على عملية التثبيت krayin',
+            'installation-description' => 'عادة ما تتضمن عملية تثبيت Quome عدة خطوات. إليك نظرة عامة عامة على عملية التثبيت quome',
             'installation-info'        => 'نحن سعداء برؤيتك هنا!',
             'installation-title'       => 'مرحبًا بك في التثبيت',
             'installation-wizard'      => 'لغة معالج التثبيت',
-            'title'                    => 'مثبت Krayin',
+            'title'                    => 'مثبت Quome',
             'webkul'                   => 'Webkul',
         ],
     ],

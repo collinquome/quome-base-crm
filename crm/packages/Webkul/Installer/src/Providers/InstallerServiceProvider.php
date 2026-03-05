@@ -35,7 +35,7 @@ class InstallerServiceProvider extends ServiceProvider
 
         $router->aliasMiddleware('installer_locale', Locale::class);
 
-        Event::listen('krayin.installed', 'Webkul\Installer\Listeners\Installer@installed');
+        Event::listen('quome.installed', 'Webkul\Installer\Listeners\Installer@installed');
 
         $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'installer');
 
