@@ -12,21 +12,24 @@ fi
 if [ ! -f ".env" ]; then
     echo "Setting up .env file..."
     cp .env.example .env
-
-    sed -i "s|APP_URL=.*|APP_URL=http://localhost:8190|" .env
-    sed -i "s|DB_HOST=.*|DB_HOST=db|" .env
-    sed -i "s|DB_PORT=.*|DB_PORT=3306|" .env
-    sed -i "s|DB_DATABASE=.*|DB_DATABASE=krayin_crm|" .env
-    sed -i "s|DB_USERNAME=.*|DB_USERNAME=krayin|" .env
-    sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=secret|" .env
-    sed -i "s|REDIS_HOST=.*|REDIS_HOST=redis|" .env
-    sed -i "s|CACHE_DRIVER=.*|CACHE_DRIVER=redis|" .env
-    sed -i "s|QUEUE_CONNECTION=.*|QUEUE_CONNECTION=redis|" .env
-    sed -i "s|SESSION_DRIVER=.*|SESSION_DRIVER=redis|" .env
-    sed -i "s|MAIL_HOST=.*|MAIL_HOST=mailpit|" .env
-    sed -i "s|MAIL_PORT=.*|MAIL_PORT=1025|" .env
-    sed -i "s|APP_TIMEZONE=.*|APP_TIMEZONE=UTC|" .env
 fi
+
+# Always ensure Docker service hostnames are correct (fixes issues if .env was
+# overwritten by a different entrypoint, e.g. the production Dockerfile)
+echo "Ensuring Docker service hostnames in .env..."
+sed -i "s|APP_URL=.*|APP_URL=http://localhost:8190|" .env
+sed -i "s|DB_HOST=.*|DB_HOST=db|" .env
+sed -i "s|DB_PORT=.*|DB_PORT=3306|" .env
+sed -i "s|DB_DATABASE=.*|DB_DATABASE=krayin_crm|" .env
+sed -i "s|DB_USERNAME=.*|DB_USERNAME=krayin|" .env
+sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=secret|" .env
+sed -i "s|REDIS_HOST=.*|REDIS_HOST=redis|" .env
+sed -i "s|CACHE_DRIVER=.*|CACHE_DRIVER=redis|" .env
+sed -i "s|QUEUE_CONNECTION=.*|QUEUE_CONNECTION=redis|" .env
+sed -i "s|SESSION_DRIVER=.*|SESSION_DRIVER=redis|" .env
+sed -i "s|MAIL_HOST=.*|MAIL_HOST=mailpit|" .env
+sed -i "s|MAIL_PORT=.*|MAIL_PORT=1025|" .env
+sed -i "s|APP_TIMEZONE=.*|APP_TIMEZONE=UTC|" .env
 
 # Generate key if missing
 if grep -q "^APP_KEY=$" .env 2>/dev/null; then
