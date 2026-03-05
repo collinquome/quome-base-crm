@@ -161,6 +161,10 @@ class LeadController extends Controller
 
         $data['status'] = 1;
 
+        if (empty($data['user_id'])) {
+            $data['user_id'] = auth()->guard('user')->id();
+        }
+
         if (! empty($data['lead_pipeline_stage_id'])) {
             $stage = $this->stageRepository->findOrFail($data['lead_pipeline_stage_id']);
 

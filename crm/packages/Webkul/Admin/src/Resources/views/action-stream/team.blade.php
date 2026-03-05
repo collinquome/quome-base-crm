@@ -97,7 +97,7 @@
                 </div>
 
                 <!-- Empty State -->
-                <div v-else-if="actions.length === 0" class="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white py-16 dark:border-gray-800 dark:bg-gray-900" data-testid="team-stream-empty">
+                <div v-else-if="actions.length === 0" class="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-8 py-24 dark:border-gray-800 dark:bg-gray-900" data-testid="team-stream-empty">
                     <span class="icon-activity text-6xl text-gray-300 dark:text-gray-600"></span>
                     <p class="mt-4 text-lg font-medium text-gray-500 dark:text-gray-400">No team actions found</p>
                     <p class="text-sm text-gray-400 dark:text-gray-500">Adjust filters or create actions for team members</p>
