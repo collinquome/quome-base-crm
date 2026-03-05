@@ -138,6 +138,15 @@ if [ "$HAS_USERS" = "no" ] || [ -z "$HAS_USERS" ]; then
 else
     echo "Running any new migrations..."
     php artisan migrate --force 2>&1 || true
+
+    # Fix leads with NULL user_id (assign to first admin user)
+    php artisan tinker --execute="
+        \$admin = \Webkul\User\Models\User::first();
+        if (\$admin) {
+            \$count = \DB::table('leads')->whereNull('user_id')->update(['user_id' => \$admin->id]);
+            echo \"Fixed {\$count} leads with NULL user_id.\";
+        }
+    " 2>/dev/null || true
 fi
 
 # Apply demo brand if brand.json exists and white-label not yet configured
