@@ -1,6 +1,6 @@
 {
     "name": "webkul/action-stream",
-    "description": "Action Stream (Next Actions) package for Krayin CRM",
+    "description": "Action Stream (Next Actions) package for Quome CRM",
     "type": "library",
     "require": {},
     "autoload": {

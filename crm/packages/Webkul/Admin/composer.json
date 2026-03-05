@@ -1,5 +1,5 @@
 {
-    "name": "krayin/laravel-admin",
+    "name": "quome/laravel-admin",
     "license": "MIT",
     "authors": [
         {
@@ -8,15 +8,15 @@
         }
     ],
     "require": {
-        "krayin/laravel-attribute": "^1.0",
-        "krayin/laravel-contact": "^1.0",
-        "krayin/laravel-core": "^1.0",
-        "krayin/laravel-email": "^1.0",
-        "krayin/laravel-lead": "^1.0",
-        "krayin/laravel-product": "^1.0",
-        "krayin/laravel-tag": "^1.0",
-        "krayin/laravel-ui": "^1.0",
-        "krayin/laravel-user": "^1.0"
+        "quome/laravel-attribute": "^1.0",
+        "quome/laravel-contact": "^1.0",
+        "quome/laravel-core": "^1.0",
+        "quome/laravel-email": "^1.0",
+        "quome/laravel-lead": "^1.0",
+        "quome/laravel-product": "^1.0",
+        "quome/laravel-tag": "^1.0",
+        "quome/laravel-ui": "^1.0",
+        "quome/laravel-user": "^1.0"
     },
     "autoload": {
         "psr-4": {

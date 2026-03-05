@@ -4,7 +4,7 @@ import { login, ADMIN_EMAIL } from './helpers/auth';
 test.describe('Smoke Tests', () => {
   test('login page loads', async ({ page }) => {
     await page.goto('/admin/login');
-    await expect(page).toHaveTitle(/Sign In|Login|Krayin/i);
+    await expect(page).toHaveTitle(/Sign In|Login|Quome/i);
   });
 
   test('can login with admin credentials', async ({ page }) => {

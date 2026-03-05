@@ -1,19 +1,19 @@
-# Architecture Planning: White-Label CRM based on Krayin Laravel CRM
+# Architecture Planning: White-Label CRM based on Quome Laravel CRM
 
 ## Overview
 
-This project forks Krayin Laravel CRM (v2.1) and extends it to achieve feature parity with OnePageCRM while adding white-label capabilities. The result is a self-hosted, brandable CRM with action-first workflows, mobile apps, email sophistication, and a rich integration ecosystem.
+This project forks Quome Laravel CRM (v2.1) and extends it to achieve feature parity with OnePageCRM while adding white-label capabilities. The result is a self-hosted, brandable CRM with action-first workflows, mobile apps, email sophistication, and a rich integration ecosystem.
 
 ## Tech Stack
 
-### Backend (Existing - Krayin)
+### Backend (Existing - Quome)
 - **Framework:** Laravel (PHP 8.1+)
 - **Database:** MySQL 8.0+
 - **Queue:** Laravel Queue (Redis recommended for production)
 - **Cache:** Redis
 - **Search:** Laravel Scout (optional, for full-text search)
 
-### Frontend (Existing - Krayin)
+### Frontend (Existing - Quome)
 - **SPA Framework:** Vue.js 3
 - **Build Tool:** Vite
 - **UI Components:** Custom Vue components
@@ -30,7 +30,7 @@ This project forks Krayin Laravel CRM (v2.1) and extends it to achieve feature p
 
 ## Modular Architecture
 
-Krayin uses a package-based architecture under `packages/Webkul/`. New features follow the same pattern:
+Quome uses a package-based architecture under `packages/Webkul/`. New features follow the same pattern:
 
 ```
 packages/Webkul/

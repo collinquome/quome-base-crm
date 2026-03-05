@@ -1,11 +1,11 @@
 {
-    "name": "krayin/laravel-installer",
+    "name": "quome/laravel-installer",
     "license": "MIT",
     "description": "Installer package",
     "authors": [
         {
-            "name": "krayin",
-            "email": "support@krayin.com"
+            "name": "quome",
+            "email": "support@quome.com"
         }
     ],
     "require": {},

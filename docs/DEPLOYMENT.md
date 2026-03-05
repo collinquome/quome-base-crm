@@ -15,7 +15,7 @@ docker compose up -d
 ```
 
 This starts:
-- **app** — Laravel PHP 8.2 application (Krayin CRM)
+- **app** — Laravel PHP 8.2 application (Quome CRM)
 - **nginx** — Reverse proxy on port 8190
 - **db** — MySQL 8.0
 - **redis** — Cache and queue backend

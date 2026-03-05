@@ -2,7 +2,7 @@
 
 ## Overview
 
-Cross-platform mobile CRM app built with React Native (Expo) targeting iOS and Android. Connects to the Krayin CRM backend via the Public REST API.
+Cross-platform mobile CRM app built with React Native (Expo) targeting iOS and Android. Connects to the Quome CRM backend via the Public REST API.
 
 ## Core Screens
 

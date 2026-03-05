@@ -40,9 +40,9 @@ services:
     ports:
       - "13316:3306"
     environment:
-      MYSQL_DATABASE: krayin_crm
+      MYSQL_DATABASE: quome_crm
       MYSQL_ROOT_PASSWORD: secret
-      MYSQL_USER: krayin
+      MYSQL_USER: quome
       MYSQL_PASSWORD: secret
     volumes:
       - quome_crm_dbdata:/var/lib/mysql

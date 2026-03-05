@@ -1,13 +1,13 @@
-# Gap Analysis: Krayin Laravel CRM vs OnePageCRM
+# Gap Analysis: Quome Laravel CRM vs OnePageCRM
 
 **Date:** 2026-03-04
-**Purpose:** Identify feature gaps between Krayin Laravel CRM (open-source) and OnePageCRM (paid SaaS) to guide development priorities.
+**Purpose:** Identify feature gaps between Quome Laravel CRM (open-source) and OnePageCRM (paid SaaS) to guide development priorities.
 
 ---
 
 ## Executive Summary
 
-Krayin Laravel CRM is a capable open-source CRM built on Laravel + Vue.js with strong fundamentals in contact management, leads, pipelines, email, and automation. However, it lacks OnePageCRM's signature action-focused workflow, many polished UX features, mobile apps, and the breadth of third-party integrations. The biggest gaps are in the **Action Stream paradigm**, **mobile experience**, **email sophistication**, and **field sales tools**.
+Quome Laravel CRM is a capable open-source CRM built on Laravel + Vue.js with strong fundamentals in contact management, leads, pipelines, email, and automation. However, it lacks OnePageCRM's signature action-focused workflow, many polished UX features, mobile apps, and the breadth of third-party integrations. The biggest gaps are in the **Action Stream paradigm**, **mobile experience**, **email sophistication**, and **field sales tools**.
 
 ---
 
@@ -15,34 +15,34 @@ Krayin Laravel CRM is a capable open-source CRM built on Laravel + Vue.js with s
 
 | Symbol | Meaning |
 |---|---|
-| :white_check_mark: | Feature exists in Krayin (parity or better) |
+| :white_check_mark: | Feature exists in Quome (parity or better) |
 | :yellow_circle: | Partial — feature exists but incomplete vs OnePageCRM |
-| :red_circle: | Missing — feature does not exist in Krayin |
-| :star: | Krayin advantage — feature exists in Krayin but not in OnePageCRM |
+| :red_circle: | Missing — feature does not exist in Quome |
+| :star: | Quome advantage — feature exists in Quome but not in OnePageCRM |
 
 ---
 
 ## 1. Core Philosophy: Action Stream & Next Actions
 
-| OnePageCRM Feature | Krayin Status | Gap | Notes |
+| OnePageCRM Feature | Quome Status | Gap | Notes |
 |---|---|---|---|
-| Action Stream (prioritized to-do list) | :red_circle: Missing | **CRITICAL** | Krayin has a dashboard but no action-stream paradigm. This is OnePageCRM's core differentiator. |
-| Next Actions per contact | :red_circle: Missing | **CRITICAL** | Krayin has activities but no concept of a single "next action" tied to every contact. |
+| Action Stream (prioritized to-do list) | :red_circle: Missing | **CRITICAL** | Quome has a dashboard but no action-stream paradigm. This is OnePageCRM's core differentiator. |
+| Next Actions per contact | :red_circle: Missing | **CRITICAL** | Quome has activities but no concept of a single "next action" tied to every contact. |
 | Color-coded priority system | :red_circle: Missing | HIGH | No visual urgency indicators on follow-ups. |
 | Team Stream | :red_circle: Missing | MEDIUM | No team-wide activity feed/stream view. |
-| Distraction-free workspace | :yellow_circle: Partial | MEDIUM | Krayin's admin panel is functional but more complex/traditional than OnePageCRM's minimal design. |
+| Distraction-free workspace | :yellow_circle: Partial | MEDIUM | Quome's admin panel is functional but more complex/traditional than OnePageCRM's minimal design. |
 
-**Recommendation:** The Action Stream is OnePageCRM's #1 differentiator. Building a "Next Action" system on top of Krayin's existing Activity module would be the single highest-impact feature to add.
+**Recommendation:** The Action Stream is OnePageCRM's #1 differentiator. Building a "Next Action" system on top of Quome's existing Activity module would be the single highest-impact feature to add.
 
 ---
 
 ## 2. Contact Management
 
-| OnePageCRM Feature | Krayin Status | Gap | Notes |
+| OnePageCRM Feature | Quome Status | Gap | Notes |
 |---|---|---|---|
 | Unlimited contacts | :white_check_mark: Present | — | Self-hosted, no limits. |
-| 360-degree contact view | :white_check_mark: Present | — | Krayin has person detail view with activities, deals, etc. |
-| Custom fields | :white_check_mark: Present | — | Krayin has a robust custom attribute system (16 field types vs OnePageCRM's simpler custom fields). |
+| 360-degree contact view | :white_check_mark: Present | — | Quome has person detail view with activities, deals, etc. |
+| Custom fields | :white_check_mark: Present | — | Quome has a robust custom attribute system (16 field types vs OnePageCRM's simpler custom fields). |
 | Tags | :white_check_mark: Present | — | Full tag system with color coding. |
 | Contact notes | :white_check_mark: Present | — | Via activity notes. |
 | File attachments | :white_check_mark: Present | — | Activity file attachments. |
@@ -57,10 +57,10 @@ Krayin Laravel CRM is a capable open-source CRM built on Laravel + Vue.js with s
 
 ## 3. Lead Generation & Capture
 
-| OnePageCRM Feature | Krayin Status | Gap | Notes |
+| OnePageCRM Feature | Quome Status | Gap | Notes |
 |---|---|---|---|
 | Browser extension (Lead Clipper) | :red_circle: Missing | HIGH | No Chrome/Edge extension for one-click lead capture from web pages. |
-| Web Forms | :white_check_mark: Present | — | Krayin has a full WebForm module with embeddable forms. |
+| Web Forms | :white_check_mark: Present | — | Quome has a full WebForm module with embeddable forms. |
 | Social media lead capture | :red_circle: Missing | MEDIUM | No social profile scraping or integration. |
 | Mobile lead capture | :red_circle: Missing | HIGH | No mobile app exists. |
 | AI Business Card Scanner | :red_circle: Missing | MEDIUM | No card scanning capability. |
@@ -69,30 +69,30 @@ Krayin Laravel CRM is a capable open-source CRM built on Laravel + Vue.js with s
 
 ## 4. Deal & Pipeline Management
 
-| OnePageCRM Feature | Krayin Status | Gap | Notes |
+| OnePageCRM Feature | Quome Status | Gap | Notes |
 |---|---|---|---|
 | Kanban board | :white_check_mark: Present | — | Full drag-and-drop Kanban view for leads. |
 | Customizable deal stages | :white_check_mark: Present | — | Custom pipeline stages with sort order and probability. |
 | Sales pipeline | :white_check_mark: Present | — | Core feature. |
 | Delivery pipeline (post-sale) | :red_circle: Missing | MEDIUM | No separate pipeline type for post-sale/project management. |
-| Multiple pipelines | :white_check_mark: Present | — | Krayin supports multiple pipelines. |
+| Multiple pipelines | :white_check_mark: Present | — | Quome supports multiple pipelines. |
 | Forecast view | :red_circle: Missing | HIGH | No revenue forecasting based on stage probability. |
 | Revenue forecasting | :red_circle: Missing | HIGH | No automatic revenue prediction. |
-| Deal velocity tracking | :yellow_circle: Partial | MEDIUM | Krayin tracks "rotten days" (stale lead detection) but not full deal velocity metrics per stage. |
+| Deal velocity tracking | :yellow_circle: Partial | MEDIUM | Quome tracks "rotten days" (stale lead detection) but not full deal velocity metrics per stage. |
 | Inactive days tracking | :white_check_mark: Present | — | "Rotten days" configuration per pipeline. |
 | Unlimited deals | :white_check_mark: Present | — | Self-hosted, no limits. |
 | Products & services catalog | :white_check_mark: Present | — | Full product module with lead-product association. |
-| Quick Quotes | :white_check_mark: Present | — | Krayin has a dedicated Quotes module (arguably more powerful than OnePageCRM's "Quick Quotes"). |
+| Quick Quotes | :white_check_mark: Present | — | Quome has a dedicated Quotes module (arguably more powerful than OnePageCRM's "Quick Quotes"). |
 
 ---
 
 ## 5. Email Management
 
-| OnePageCRM Feature | Krayin Status | Gap | Notes |
+| OnePageCRM Feature | Quome Status | Gap | Notes |
 |---|---|---|---|
-| Full email sync (two-way) | :yellow_circle: Partial | HIGH | Krayin has a built-in mail client with compose/reply/forward, but relies on inbound parse (Sendgrid webhook) rather than true two-way IMAP/SMTP sync. |
+| Full email sync (two-way) | :yellow_circle: Partial | HIGH | Quome has a built-in mail client with compose/reply/forward, but relies on inbound parse (Sendgrid webhook) rather than true two-way IMAP/SMTP sync. |
 | Smart email filtering | :red_circle: Missing | MEDIUM | No automatic filtering to show only emails from CRM contacts. |
-| Shared inbox | :yellow_circle: Partial | MEDIUM | Krayin has inbox/outbox/drafts/trash but no explicit "shared team inbox" concept. |
+| Shared inbox | :yellow_circle: Partial | MEDIUM | Quome has inbox/outbox/drafts/trash but no explicit "shared team inbox" concept. |
 | Email templates | :white_check_mark: Present | — | Full email template system with dynamic placeholders. |
 | Bulk email send | :red_circle: Missing | HIGH | No bulk/mass email sending capability. |
 | Email scheduling | :red_circle: Missing | MEDIUM | No delayed/scheduled email sending. |
@@ -104,21 +104,21 @@ Krayin Laravel CRM is a capable open-source CRM built on Laravel + Vue.js with s
 
 ## 6. Calls & Meetings
 
-| OnePageCRM Feature | Krayin Status | Gap | Notes |
+| OnePageCRM Feature | Quome Status | Gap | Notes |
 |---|---|---|---|
 | Call logging | :white_check_mark: Present | — | Activities support call type. |
 | Speed dial | :red_circle: Missing | LOW | No quick-dial feature. |
-| Click to Call | :red_circle: Missing | MEDIUM | No VoIP/telephony integration (available as paid Krayin extension). |
+| Click to Call | :red_circle: Missing | MEDIUM | No VoIP/telephony integration (available as paid Quome extension). |
 | Meeting notes | :white_check_mark: Present | — | Via activity notes on meetings. |
-| Calendar sync | :red_circle: Missing | HIGH | No native Google/Outlook/Apple calendar sync (available as paid Krayin extension). |
+| Calendar sync | :red_circle: Missing | HIGH | No native Google/Outlook/Apple calendar sync (available as paid Quome extension). |
 
 ---
 
 ## 7. Automation & Workflows
 
-| OnePageCRM Feature | Krayin Status | Gap | Notes |
+| OnePageCRM Feature | Quome Status | Gap | Notes |
 |---|---|---|---|
-| Workflow automation engine | :white_check_mark: Present | — | Krayin has a robust workflow engine with event-driven automation. |
+| Workflow automation engine | :white_check_mark: Present | — | Quome has a robust workflow engine with event-driven automation. |
 | Condition-based rules | :white_check_mark: Present | — | Supports conditions on 12+ attribute types. |
 | Actions: update entity | :white_check_mark: Present | — | Can update attributes via workflow. |
 | Actions: send email | :white_check_mark: Present | — | Email actions with template + placeholder support. |
@@ -131,7 +131,7 @@ Krayin Laravel CRM is a capable open-source CRM built on Laravel + Vue.js with s
 
 ## 8. Reporting & Analytics
 
-| OnePageCRM Feature | Krayin Status | Gap | Notes |
+| OnePageCRM Feature | Quome Status | Gap | Notes |
 |---|---|---|---|
 | Dynamic dashboard | :white_check_mark: Present | — | Dashboard with charts for leads, activities, pipeline, email, products, quotes. |
 | Dashboard segmentation (by team/user) | :yellow_circle: Partial | MEDIUM | Dashboard exists but unclear if it supports per-user/team filtering. |
@@ -145,7 +145,7 @@ Krayin Laravel CRM is a capable open-source CRM built on Laravel + Vue.js with s
 
 ## 9. Team Collaboration
 
-| OnePageCRM Feature | Krayin Status | Gap | Notes |
+| OnePageCRM Feature | Quome Status | Gap | Notes |
 |---|---|---|---|
 | Contact & deal assignment | :white_check_mark: Present | — | Leads and activities can be assigned to users. |
 | Comments & @mentions | :red_circle: Missing | HIGH | No comment system or @mention notifications on records. |
@@ -159,7 +159,7 @@ Krayin Laravel CRM is a capable open-source CRM built on Laravel + Vue.js with s
 
 ## 10. Mobile CRM
 
-| OnePageCRM Feature | Krayin Status | Gap | Notes |
+| OnePageCRM Feature | Quome Status | Gap | Notes |
 |---|---|---|---|
 | Native iOS app | :red_circle: Missing | **CRITICAL** | No mobile app of any kind. |
 | Native Android app | :red_circle: Missing | **CRITICAL** | No mobile app of any kind. |
@@ -175,7 +175,7 @@ Krayin Laravel CRM is a capable open-source CRM built on Laravel + Vue.js with s
 
 ## 11. Security & Data
 
-| OnePageCRM Feature | Krayin Status | Gap | Notes |
+| OnePageCRM Feature | Quome Status | Gap | Notes |
 |---|---|---|---|
 | Encrypted connections | :yellow_circle: Partial | LOW | Depends on hosting configuration (user responsibility for TLS). |
 | Daily backups | :yellow_circle: Partial | LOW | User-managed; no built-in automated backup system. |
@@ -188,9 +188,9 @@ Krayin Laravel CRM is a capable open-source CRM built on Laravel + Vue.js with s
 
 ## 12. Integrations
 
-| OnePageCRM Integration | Krayin Status | Gap | Notes |
+| OnePageCRM Integration | Quome Status | Gap | Notes |
 |---|---|---|---|
-| Google (Gmail, Calendar, Drive) | :red_circle: Missing | HIGH | Available as paid Krayin extension only. |
+| Google (Gmail, Calendar, Drive) | :red_circle: Missing | HIGH | Available as paid Quome extension only. |
 | Outlook | :red_circle: Missing | HIGH | No Outlook integration. |
 | Apple Calendar | :red_circle: Missing | MEDIUM | No Apple Calendar sync. |
 | QuickBooks | :red_circle: Missing | MEDIUM | No accounting integration. |
@@ -203,20 +203,20 @@ Krayin Laravel CRM is a capable open-source CRM built on Laravel + Vue.js with s
 | Help Scout | :red_circle: Missing | LOW | No integration. |
 | Aircall | :red_circle: Missing | MEDIUM | VoIP available as paid extension. |
 | Talkdesk | :red_circle: Missing | LOW | No integration. |
-| WhatsApp | :red_circle: Missing | MEDIUM | Available as paid Krayin extension only. |
+| WhatsApp | :red_circle: Missing | MEDIUM | Available as paid Quome extension only. |
 | Unbounce / Wufoo | :red_circle: Missing | LOW | No landing page integrations. |
 | Evernote / Dropbox | :red_circle: Missing | LOW | No productivity integrations. |
 | Zapier | :red_circle: Missing | **CRITICAL** | No Zapier connector = no easy integration with 5,000+ apps. |
 | Make.com | :red_circle: Missing | HIGH | No Make.com connector. |
 | PandaDoc | :red_circle: Missing | LOW | No document signing integration. |
-| REST API | :yellow_circle: Partial | MEDIUM | Krayin has internal API routes but no documented public REST API for third-party consumption. |
+| REST API | :yellow_circle: Partial | MEDIUM | Quome has internal API routes but no documented public REST API for third-party consumption. |
 | Webhooks | :white_check_mark: Present | — | Full webhook system in automation module. |
 
 ---
 
-## 13. Krayin Advantages (Features OnePageCRM Lacks)
+## 13. Quome Advantages (Features OnePageCRM Lacks)
 
-| Feature | Krayin | OnePageCRM | Impact |
+| Feature | Quome | OnePageCRM | Impact |
 |---|---|---|---|
 | :star: Warehouse Management | Full warehouse module with locations, products, tags | Not available | Useful for product-based businesses |
 | :star: Marketing Campaigns | Campaign module with events and email marketing | Not available | Built-in campaign management |
@@ -309,4 +309,4 @@ Krayin Laravel CRM is a capable open-source CRM built on Laravel + Vue.js with s
 
 ---
 
-*This analysis is based on OnePageCRM's public feature documentation and Krayin Laravel CRM v2.1 source code as of March 2026.*
+*This analysis is based on OnePageCRM's public feature documentation and Quome Laravel CRM v2.1 source code as of March 2026.*

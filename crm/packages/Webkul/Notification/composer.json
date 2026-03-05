@@ -1,6 +1,6 @@
 {
     "name": "webkul/notification",
-    "description": "Notifications and Comments package for Krayin CRM",
+    "description": "Notifications and Comments package for Quome CRM",
     "type": "library",
     "require": {},
     "autoload": {

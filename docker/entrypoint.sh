@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Starting Krayin CRM setup..."
+echo "Starting Quome CRM setup..."
 
 # 1. Install composer dependencies FIRST
 if [ ! -f "vendor/autoload.php" ]; then
@@ -20,8 +20,8 @@ echo "Ensuring Docker service hostnames in .env..."
 sed -i "s|APP_URL=.*|APP_URL=http://localhost:8190|" .env
 sed -i "s|DB_HOST=.*|DB_HOST=db|" .env
 sed -i "s|DB_PORT=.*|DB_PORT=3306|" .env
-sed -i "s|DB_DATABASE=.*|DB_DATABASE=krayin_crm|" .env
-sed -i "s|DB_USERNAME=.*|DB_USERNAME=krayin|" .env
+sed -i "s|DB_DATABASE=.*|DB_DATABASE=quome_crm|" .env
+sed -i "s|DB_USERNAME=.*|DB_USERNAME=quome|" .env
 sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=secret|" .env
 sed -i "s|REDIS_HOST=.*|REDIS_HOST=redis|" .env
 sed -i "s|CACHE_DRIVER=.*|CACHE_DRIVER=redis|" .env
@@ -42,7 +42,7 @@ echo "Waiting for database..."
 MAX_TRIES=30
 TRIES=0
 while [ $TRIES -lt $MAX_TRIES ]; do
-    if php -r "try { new PDO('mysql:host=db;port=3306;dbname=krayin_crm', 'krayin', 'secret'); exit(0); } catch(Exception \$e) { exit(1); }" 2>/dev/null; then
+    if php -r "try { new PDO('mysql:host=db;port=3306;dbname=quome_crm', 'quome', 'secret'); exit(0); } catch(Exception \$e) { exit(1); }" 2>/dev/null; then
         echo "Database is ready."
         break
     fi
@@ -51,7 +51,7 @@ while [ $TRIES -lt $MAX_TRIES ]; do
 done
 
 # 4. Run migrations if the users table doesn't exist
-HAS_USERS=$(php -r "try { \$pdo = new PDO('mysql:host=db;port=3306;dbname=krayin_crm', 'krayin', 'secret'); \$r = \$pdo->query(\"SELECT COUNT(*) FROM users\"); echo \$r->fetchColumn(); } catch(Exception \$e) { echo 'no'; }" 2>/dev/null)
+HAS_USERS=$(php -r "try { \$pdo = new PDO('mysql:host=db;port=3306;dbname=quome_crm', 'quome', 'secret'); \$r = \$pdo->query(\"SELECT COUNT(*) FROM users\"); echo \$r->fetchColumn(); } catch(Exception \$e) { echo 'no'; }" 2>/dev/null)
 
 if [ "$HAS_USERS" = "no" ] || [ -z "$HAS_USERS" ]; then
     echo "Running initial database setup..."
@@ -107,7 +107,7 @@ php artisan route:clear 2>/dev/null || true
 php artisan view:clear 2>/dev/null || true
 
 echo "============================================"
-echo "  Krayin CRM is ready!"
+echo "  Quome CRM is ready!"
 echo "  Web:     http://localhost:8190"
 echo "  Mailpit: http://localhost:8191"
 echo "  Login:   admin@example.com / admin123"
