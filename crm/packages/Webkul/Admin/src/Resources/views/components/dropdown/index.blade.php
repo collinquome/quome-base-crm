@@ -43,7 +43,7 @@
             <div
                 class="flex select-none items-center"
                 ref="toggleBlock"
-                @click="toggle()"
+                @click.stop="toggle()"
             >
                 <slot name="toggle"></slot>
             </div>

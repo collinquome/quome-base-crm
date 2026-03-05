@@ -114,7 +114,8 @@
                             </button>
                             <button
                                 type="button"
-                                class="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+                                class="rounded-md border px-3 py-1.5 text-xs font-medium"
+                                :class="newAction.description ? 'bg-blue-600 border-blue-600 text-white hover:bg-blue-700 cursor-pointer' : 'bg-gray-300 border-gray-400 text-gray-700 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-300'"
                                 @click="createAction"
                                 :disabled="!newAction.description"
                                 data-testid="next-action-save-btn"
@@ -239,7 +240,7 @@
                 async fetchActions() {
                     try {
                         // Fetch current pending action
-                        const pendingRes = await this.$axios.get('/api/v1/action-stream', {
+                        const pendingRes = await this.$axios.get('/admin/action-stream/list', {
                             params: {
                                 actionable_type: this.entityType,
                                 actionable_id: this.entityId,
@@ -256,7 +257,7 @@
                         }
 
                         // Fetch completed actions for history
-                        const completedRes = await this.$axios.get('/api/v1/action-stream', {
+                        const completedRes = await this.$axios.get('/admin/action-stream/list', {
                             params: {
                                 actionable_type: this.entityType,
                                 actionable_id: this.entityId,
@@ -265,8 +266,8 @@
                             },
                         });
                         this.completedActions = completedRes.data?.data || [];
-                    } catch (error) {
-                        console.error('Failed to fetch actions:', error);
+                    } catch {
+                        // Action stream API may not be available yet — widget still works for manual entry
                     } finally {
                         this.loaded = true;
                     }
@@ -275,7 +276,7 @@
                 async completeAndPrompt() {
                     if (!this.currentAction) return;
                     try {
-                        await this.$axios.post(`/api/v1/action-stream/${this.currentAction.id}/complete`);
+                        await this.$axios.post(`/admin/action-stream/${this.currentAction.id}/complete`);
                         this.currentAction = null;
                         this.showCreateForm = true;
                         this.fetchActions();
@@ -286,7 +287,7 @@
 
                 async createAction() {
                     try {
-                        await this.$axios.post('/api/v1/action-stream', {
+                        await this.$axios.post('/admin/action-stream', {
                             actionable_type: this.entityType,
                             actionable_id: this.entityId,
                             ...this.newAction,

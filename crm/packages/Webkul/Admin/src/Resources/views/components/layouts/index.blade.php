@@ -127,7 +127,7 @@
         <x-admin::layouts.header />
 
         <div
-            class="group/container sidebar-collapsed flex gap-4"
+            class="group/container sidebar-collapsed flex gap-0"
             ref="appLayout"
         >
             <!-- Page Sidebar Blade Component -->
@@ -139,11 +139,13 @@
                     {{ $slot }}
                 </div>
 
-                <!-- Powered By -->
+                <!-- Footer -->
                 <div class="mt-auto pt-6">
-                    <div class="border-t bg-white py-5 text-center text-sm font-normal dark:border-gray-800 dark:bg-gray-900 dark:text-white max-md:py-3">
-                        <p>{!! core()->getConfigData('general.settings.footer.label') !!}</p>
-                    </div>
+                    @if(core()->getConfigData('general.settings.footer.label'))
+                        <div class="border-t bg-white py-5 text-center text-sm font-normal dark:border-gray-800 dark:bg-gray-900 dark:text-white max-md:py-3">
+                            <p>{!! core()->getConfigData('general.settings.footer.label') !!}</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

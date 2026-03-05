@@ -12,7 +12,7 @@
     <script type="text/x-template" id="v-lead-stages-template">
         <!-- Stages Container -->
         <div
-            class="flex w-full max-w-full overflow-auto"
+            class="flex w-full max-w-full overflow-visible"
             :class="{'opacity-50 pointer-events-none': isUpdating}"
         >
             <!-- Stages Item -->
@@ -347,7 +347,7 @@
                 },
 
                 saveNextAction() {
-                    this.$axios.post('/api/v1/action-stream', {
+                    this.$axios.post('/admin/action-stream', {
                         actionable_type: 'lead',
                         actionable_id: {{ $lead->id }},
                         ...this.promptAction,
