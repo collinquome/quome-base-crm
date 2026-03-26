@@ -17,7 +17,7 @@
                 <x-admin::attributes.view
                     :custom-attributes="app('Webkul\Attribute\Repositories\AttributeRepository')->findWhere([
                         'entity_type' => 'products',
-                        ['code', 'IN', ['SKU', 'price', 'quantity', 'status']]
+                        ['code', 'IN', ['price', 'status']]
                     ])->sortBy('sort_order')"
                     :entity="$product"
                     :url="route('admin.products.update', $product->id)"   

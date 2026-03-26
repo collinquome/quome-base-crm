@@ -39,10 +39,6 @@
 
                     {!! view_render_event('admin.products.view.left.sku.before', ['product' => $product]) !!}
 
-                    <p class="break-words text-sm font-normal dark:text-white">
-                        @lang('admin::app.products.view.sku') : {{ $product->sku }}
-                    </p>
-
                     {!! view_render_event('admin.products.view.left.sku.after', ['product' => $product]) !!}
                 </div>
 
