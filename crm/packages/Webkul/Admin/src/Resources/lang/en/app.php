@@ -1927,7 +1927,7 @@ return [
                 'sales-person'        => 'Sales Person',
                 'subject'             => 'Subject',
                 'source'              => 'Source',
-                'lead-value'          => 'Lead Value',
+                'lead-value'          => 'Premium',
                 'lead-type'           => 'Lead Type',
                 'tag-name'            => 'Tag Name',
                 'contact-person'      => 'Contact Person',
@@ -1952,7 +1952,7 @@ return [
                     'contact-person'      => 'Contact Person',
                     'id'                  => 'ID',
                     'lead-type'           => 'Lead Type',
-                    'lead-value'          => 'Lead Value',
+                    'lead-value'          => 'Premium',
                     'sales-person'        => 'Sales Person',
                     'source'              => 'Source',
                     'title'               => 'Title',
@@ -2088,7 +2088,7 @@ return [
                 'lost'           => 'Lost',
                 'need-more-info' => 'Need More Details',
                 'closed-at'      => 'Closed At',
-                'won-value'      => 'Won Value',
+                'won-value'      => 'Won Premium',
                 'lost-reason'    => 'Lost Reason',
                 'save-btn'       => 'Save',
             ],
@@ -2227,12 +2227,12 @@ return [
             'end-date'   => 'End Date',
 
             'revenue' => [
-                'lost-revenue' => 'Lost Revenue',
-                'won-revenue'  => 'Won Revenue',
+                'lost-revenue' => 'Lost Premium',
+                'won-revenue'  => 'Won Premium',
             ],
 
             'over-all' => [
-                'average-lead-value'    => 'Average Lead Value',
+                'average-lead-value'    => 'Average Premium',
                 'total-leads'           => 'Total Leads',
                 'average-leads-per-day' => 'Average Leads Per Day',
                 'total-quotations'      => 'Total Quotations',
