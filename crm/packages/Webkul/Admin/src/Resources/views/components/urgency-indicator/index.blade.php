@@ -40,11 +40,12 @@
             <!-- Quick Actions -->
             <button
                 type="button"
-                class="rounded-md p-1 text-green-600 transition-all hover:bg-green-50 dark:hover:bg-green-900/20"
+                class="flex items-center gap-1 rounded-md border border-green-600 bg-green-600 px-2.5 py-1 text-xs font-semibold text-white transition-all hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
                 @click="completeAction"
                 title="Complete"
             >
-                <span class="icon-checkbox-outline text-lg"></span>
+                <span class="icon-checkbox-outline text-sm"></span>
+                Done
             </button>
         </div>
         <div v-else-if="loaded && !nextAction" class="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-400 dark:border-gray-700 dark:text-gray-500" data-testid="urgency-indicator-empty">

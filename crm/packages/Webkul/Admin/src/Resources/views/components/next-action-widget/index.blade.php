@@ -22,7 +22,7 @@
                     <button
                         v-if="!showCreateForm"
                         type="button"
-                        class="rounded-md px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                        class="rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
                         @click="showCreateForm = true"
                         data-testid="next-action-new-btn"
                     >
@@ -56,7 +56,7 @@
                         <!-- Complete Button -->
                         <button
                             type="button"
-                            class="flex-shrink-0 rounded-md border border-green-300 px-3 py-1.5 text-xs font-medium text-green-700 transition-all hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20"
+                            class="flex-shrink-0 rounded-md border border-green-600 bg-green-600 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-green-700 hover:border-green-700 dark:bg-green-700 dark:border-green-700 dark:hover:bg-green-600"
                             @click="completeAndPrompt"
                             data-testid="next-action-complete-btn"
                         >
@@ -140,7 +140,7 @@
                             <button
                                 type="button"
                                 class="rounded-md border px-3 py-1.5 text-xs font-medium"
-                                :class="(!newAction.description || saving) ? 'bg-gray-300 border-gray-400 text-gray-700 cursor-not-allowed dark:bg-gray-600 dark:border-gray-500 dark:text-gray-300' : 'bg-blue-600 border-blue-600 text-white hover:bg-blue-700 cursor-pointer'"
+                                :class="(!newAction.description || saving) ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400' : 'bg-blue-600 border-blue-600 text-white hover:bg-blue-700 cursor-pointer'"
                                 @click="createAction"
                                 :disabled="!newAction.description || saving"
                                 data-testid="next-action-save-btn"
