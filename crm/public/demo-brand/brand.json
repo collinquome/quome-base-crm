@@ -1,10 +1,10 @@
 {
-  "app_name": "NovaCRM",
-  "primary_color": "#0891B2",
-  "secondary_color": "#0E7490",
-  "accent_color": "#F59E0B",
-  "email_sender_name": "NovaCRM",
-  "support_url": "https://novacrm.example.com/support",
+  "app_name": "Union Bay Risk",
+  "primary_color": "#1E3A5F",
+  "secondary_color": "#2C5282",
+  "accent_color": "#E5A100",
+  "email_sender_name": "Union Bay Risk",
+  "support_url": "https://www.unionbayrisk.com/",
   "logo": "demo-brand/logo.png",
   "logo_dark": "demo-brand/logo-dark.png",
   "favicon": "demo-brand/favicon.png"

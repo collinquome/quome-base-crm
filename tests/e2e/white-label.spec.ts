@@ -138,4 +138,35 @@ test.describe('White Label Settings', () => {
     // Should fail validation (max:7)
     expect(response.status()).toBe(422);
   });
+
+  test('Union Bay Risk branding can be applied and verified', async ({ page }) => {
+    // Apply Union Bay Risk branding
+    const applyRes = await page.request.post('/admin/api/white-label', {
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      data: {
+        app_name: 'Union Bay Risk',
+        primary_color: '#1E3A5F',
+        secondary_color: '#2C5282',
+        accent_color: '#E5A100',
+        email_sender_name: 'Union Bay Risk',
+      },
+    });
+    expect(applyRes.ok()).toBeTruthy();
+
+    // Verify it stuck
+    const response = await page.request.get('/admin/api/white-label');
+    expect(response.ok()).toBeTruthy();
+    const json = await response.json();
+    expect(json.data.app_name).toBe('Union Bay Risk');
+    expect(json.data.primary_color).toBe('#1E3A5F');
+  });
+
+  test('Union Bay Risk logo files exist', async ({ page }) => {
+    const logo = await page.request.get('/demo-brand/logo.png');
+    expect(logo.ok()).toBeTruthy();
+    expect(logo.headers()['content-type']).toContain('image/png');
+
+    const favicon = await page.request.get('/demo-brand/favicon.png');
+    expect(favicon.ok()).toBeTruthy();
+  });
 });

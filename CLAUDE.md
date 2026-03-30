@@ -49,13 +49,22 @@ Union Bay Risk - paying customer deployed on Railway.
 - If a ticket turns out to be unnecessary or duplicate, archive it
 - If a ticket is too large, break it into smaller cards
 
-## Railway Deployment
+## Railway Deployment & Production
 - **Project ID:** `d65119ac-4b43-483b-b54a-d911d465e464`
 - **Environment ID:** `07ef2598-e1e7-4486-8dc9-281112b70877`
 - **Service:** `crm-app`
+- **Railway Host:** `crm-app-production-23d7.up.railway.app`
 - **Dashboard:** https://railway.com/project/d65119ac-4b43-483b-b54a-d911d465e464
-- **Prod URL:** https://cornerstone-crm.quome.dev/
-- Pushes to `main` trigger autodeploy — verify prod is healthy after each push
+- **Prod URL:** https://cornerstone-crm.quome.dev/admin/login
+- Pushes to `main` trigger autodeploy automatically
+
+### Production Deployment Rules
+- **Minimize breaking production** — test locally with Docker Compose before pushing
+- Pushes don't need to happen after every single ticket, but **periodically push batches** to keep prod up to date
+- After pushing, **verify prod is healthy**: `curl -s -o /dev/null -w "%{http_code}" https://cornerstone-crm.quome.dev/admin/login` should return 200
+- If prod breaks after a push, investigate immediately — check Railway logs via dashboard or `railway logs`
+- Migrations run automatically on deploy via the prod entrypoint
+- **Never push code that fails local Playwright tests**
 
 ## Testing Requirements
 - **Every ticket MUST include Playwright tests** — no exceptions
