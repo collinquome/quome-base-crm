@@ -19,7 +19,7 @@
                     <img
                         src="{{ $wlLogo }}"
                         alt="{{ $wlAppName }}"
-                        class="h-10 w-auto ltr:pr-16 rtl:pl-16"
+                        class="h-16 w-auto object-contain ltr:pr-16 rtl:pl-16"
                     >
                 @else
                     <span class="text-xl font-bold text-gray-800 dark:text-white ltr:pr-16 rtl:pl-16">
