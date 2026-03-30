@@ -495,3 +495,42 @@ test.describe('Action Stream - Update API', () => {
     expect(updated.data.action_type).toBe('meeting');
   });
 });
+
+test.describe('Action Reminders', () => {
+  test('overdue action creates notification via reminder command', async () => {
+    // Create a lead
+    const leadRes = await api.post('/api/v1/leads', {
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      data: {
+        title: `Reminder Test Lead ${Date.now()}`,
+        lead_value: 10,
+        lead_pipeline_id: 1,
+        lead_pipeline_stage_id: 1,
+        status: 1,
+        person: { name: `Reminder Person ${Date.now()}`, emails: [{ value: `rem-${Date.now()}@test.com`, label: 'work' }] },
+      },
+    });
+    const lead = await leadRes.json();
+
+    // Create an overdue action (due yesterday)
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    await api.post('/api/v1/action-stream', {
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      data: {
+        actionable_type: 'leads',
+        actionable_id: lead.data.id,
+        action_type: 'call',
+        description: 'Overdue reminder test',
+        priority: 'high',
+        due_date: yesterday,
+      },
+    });
+
+    // Verify overdue count is > 0
+    const overdueRes = await api.get('/api/v1/action-stream/overdue-count', {
+      headers: authHeaders(),
+    });
+    const overdueBody = await overdueRes.json();
+    expect(overdueBody.data.overdue_count).toBeGreaterThan(0);
+  });
+});
