@@ -162,6 +162,8 @@ Route::prefix('settings')->group(function () {
 
         Route::post('create', 'store')->name('admin.settings.users.store');
 
+        Route::post('{id}/invite', 'invite')->name('admin.settings.users.invite');
+
         Route::get('edit/{id?}', 'edit')->name('admin.settings.users.edit');
 
         Route::put('edit/{id}', 'update')->name('admin.settings.users.update');

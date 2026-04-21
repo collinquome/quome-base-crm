@@ -61,14 +61,17 @@ class UserController extends Controller
             'role_id'          => 'required',
             'status'           => 'boolean|in:0,1',
             'view_permission'  => 'string|in:global,group,individual',
+            'invite'           => 'nullable|boolean',
         ]);
 
         $data = request()->all();
+        $invite = ! empty($data['invite']);
 
-        if (
-            isset($data['password'])
-            && $data['password']
-        ) {
+        if ($invite) {
+            // Invitees set their own password via a magic link. Seed a random
+            // unusable password so the row is valid until they claim it.
+            $data['password'] = bcrypt(\Illuminate\Support\Str::random(40));
+        } elseif (! empty($data['password'])) {
             $data['password'] = bcrypt($data['password']);
         }
 
@@ -78,17 +81,46 @@ class UserController extends Controller
 
         $admin->groups()->sync($data['groups'] ?? []);
 
-        try {
-            Mail::queue(new UserCreatedNotification($admin));
-        } catch (\Exception $e) {
-            report($e);
+        $inviteLink = null;
+        if ($invite) {
+            $token = \Illuminate\Support\Facades\Password::broker('users')->createToken($admin);
+            $inviteLink = route('admin.reset_password.create', $token).'?email='.urlencode($admin->email);
+        } else {
+            try {
+                Mail::queue(new UserCreatedNotification($admin));
+            } catch (\Exception $e) {
+                report($e);
+            }
         }
 
         Event::dispatch('settings.user.create.after', $admin);
 
         return new JsonResponse([
-            'data'    => $admin,
-            'message' => trans('admin::app.settings.users.index.create-success'),
+            'data'         => $admin,
+            'invite_link'  => $inviteLink,
+            'message'      => $invite
+                ? 'User invited. Share the magic link below — it sets their password on first use.'
+                : trans('admin::app.settings.users.index.create-success'),
+        ]);
+    }
+
+    /**
+     * Generate a fresh magic-link invitation for an existing user.
+     *
+     * Useful when the original link was lost or expired. Returns the URL the
+     * admin can copy and share. The user follows it to set a new password.
+     */
+    public function invite(int $id): JsonResponse
+    {
+        $admin = $this->userRepository->findOrFail($id);
+
+        $token = \Illuminate\Support\Facades\Password::broker('users')->createToken($admin);
+        $inviteLink = route('admin.reset_password.create', $token).'?email='.urlencode($admin->email);
+
+        return new JsonResponse([
+            'data'        => ['email' => $admin->email, 'name' => $admin->name],
+            'invite_link' => $inviteLink,
+            'message'     => 'Fresh magic link generated.',
         ]);
     }
 

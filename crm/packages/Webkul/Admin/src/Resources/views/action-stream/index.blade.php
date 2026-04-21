@@ -109,13 +109,13 @@
                 </div>
 
                 <!-- Empty State -->
-                <div v-else-if="actions.length === 0" class="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-8 py-40 text-center dark:border-gray-800 dark:bg-gray-900" data-testid="action-stream-empty">
+                <div v-else-if="actions.length === 0" class="flex p-4 flex-col items-center justify-center rounded-lg border border-gray-200 bg-white text-center dark:border-gray-800 dark:bg-gray-900" data-testid="action-stream-empty">
                     <span class="icon-activity text-7xl text-gray-300 dark:text-gray-600"></span>
                     <p class="mt-8 text-lg font-medium text-gray-500 dark:text-gray-400">No pending actions</p>
                     <p class="mt-3 max-w-xs text-sm text-gray-400 dark:text-gray-500">Create a new action to get started</p>
                     <button
                         type="button"
-                        class="mt-6 rounded-md border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                        class="mt-4 rounded-md border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold transition-colors hover:bg-blue-700"
                         @click="openCreate()"
                         data-testid="action-stream-empty-create-btn"
                     >
@@ -218,7 +218,7 @@
 
                 <!-- Create Action Modal -->
                 <div v-if="createOpen" class="fixed inset-0 z-[9998] flex items-center justify-center bg-black/40" @click.self="closeCreate" data-testid="action-stream-create-modal">
-                    <div class="max-h-[90vh] w-full max-w-lg overflow-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900">
+                    <div class="max-h-[90vh] w-3/4 p-4 max-w-lg overflow-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900">
                         <div class="mb-4 flex items-center justify-between">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New Action</h3>
                             <button type="button" class="rounded-md p-1 hover:bg-gray-100 dark:hover:bg-gray-800" @click="closeCreate">

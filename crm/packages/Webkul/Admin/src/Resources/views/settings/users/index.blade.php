@@ -289,7 +289,22 @@
 
                             {!! view_render_event('admin.settings.users.index.form.password.before') !!}
 
-                            <div class="flex gap-4">
+                            <!-- Magic-link invite toggle (only when creating a new user) -->
+                            <x-admin::form.control-group v-if="!user.id" class="!mb-4">
+                                <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <input
+                                        type="checkbox"
+                                        v-model="user.invite"
+                                        name="invite"
+                                        value="1"
+                                        data-testid="user-invite-toggle"
+                                    />
+                                    Send magic link invite instead of setting a password
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">(the user sets their own password on first use)</span>
+                                </label>
+                            </x-admin::form.control-group>
+
+                            <div class="flex gap-4" v-if="!user.invite || user.id">
                                 <!-- Password -->
                                 <x-admin::form.control-group class="flex-1">
                                     <x-admin::form.control-group.label ::class="user.id ? '' : 'required'">
@@ -300,7 +315,7 @@
                                         type="password"
                                         id="password"
                                         name="password"
-                                        ::rules="user.id ? '' : 'required|min:6'"
+                                        ::rules="user.id || user.invite ? '' : 'required|min:6'"
                                         :label="trans('admin::app.settings.users.index.create.password')"
                                         :placeholder="trans('admin::app.settings.users.index.create.password')"
                                         ref="password"
@@ -473,6 +488,61 @@
                         </x-slot>
                     </x-admin::modal>
 
+                    <!-- Invite Magic-Link Modal -->
+                    <Teleport to="body">
+                        <div
+                            v-if="inviteModal.open"
+                            class="fixed inset-0 z-[9998] flex items-center justify-center bg-black/40"
+                            @click.self="closeInviteModal"
+                            data-testid="invite-link-modal"
+                        >
+                            <div class="max-h-[90vh] w-full max-w-xl overflow-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900">
+                                <div class="mb-3 flex items-center justify-between">
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                        Magic link ready for @{{ inviteModal.name || inviteModal.email }}
+                                    </h3>
+                                    <button type="button" class="rounded-md p-1 hover:bg-gray-100 dark:hover:bg-gray-800" @click="closeInviteModal">
+                                        <span class="icon-cross-large text-xl"></span>
+                                    </button>
+                                </div>
+
+                                <p class="mb-3 text-sm text-gray-600 dark:text-gray-300">
+                                    Share this link with <strong v-text="inviteModal.email"></strong>. The first time they open it, they'll be prompted to set their password and will be signed in. The link is tied to their email and expires in 60 minutes.
+                                </p>
+
+                                <div class="flex gap-2">
+                                    <input
+                                        ref="inviteLinkInput"
+                                        type="text"
+                                        readonly
+                                        class="flex-1 rounded-md border border-gray-300 bg-gray-50 px-3 py-2 font-mono text-xs text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                                        :value="inviteModal.link"
+                                        data-testid="invite-link-value"
+                                        @focus="$event.target.select()"
+                                    />
+                                    <button
+                                        type="button"
+                                        class="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                                        @click="copyInviteLink"
+                                        data-testid="invite-link-copy-btn"
+                                    >
+                                        @{{ inviteModal.copied ? 'Copied ✓' : 'Copy' }}
+                                    </button>
+                                </div>
+
+                                <div class="mt-4 flex justify-end">
+                                    <button
+                                        type="button"
+                                        class="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                                        @click="closeInviteModal"
+                                    >
+                                        Done
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </Teleport>
+
                     {!! view_render_event('admin.settings.users.index.form_controls.after') !!}
                 </form>
             </x-admin::form>
@@ -492,6 +562,16 @@
 
                         user: {
                             view_permission: 'individual',
+                            invite: false,
+                        },
+
+                        // Post-save invite-link modal state.
+                        inviteModal: {
+                            open: false,
+                            link: '',
+                            email: '',
+                            name: '',
+                            copied: false,
                         },
                     };
                 },
@@ -539,9 +619,51 @@
                         this.user = {
                             groups: [],
                             view_permission: 'individual',
+                            invite: false,
                         };
 
                         this.$refs.userUpdateAndCreateModal.toggle();
+                    },
+
+                    showInviteLink(payload) {
+                        this.inviteModal = {
+                            open: true,
+                            link: payload.link,
+                            email: payload.email || '',
+                            name: payload.name || '',
+                            copied: false,
+                        };
+                    },
+
+                    closeInviteModal() {
+                        this.inviteModal.open = false;
+                    },
+
+                    async copyInviteLink() {
+                        try {
+                            await navigator.clipboard.writeText(this.inviteModal.link);
+                            this.inviteModal.copied = true;
+                            setTimeout(() => { this.inviteModal.copied = false; }, 2500);
+                        } catch (_) {
+                            // Fallback for older browsers — select the input and let the user copy manually.
+                            this.$refs.inviteLinkInput?.select?.();
+                        }
+                    },
+
+                    async resendInvite(userId) {
+                        try {
+                            const response = await this.$axios.post(`{{ url('admin/settings/users') }}/${userId}/invite`);
+                            this.showInviteLink({
+                                link: response.data.invite_link,
+                                email: response.data.data?.email,
+                                name: response.data.data?.name,
+                            });
+                        } catch (error) {
+                            this.$emitter.emit('add-flash', {
+                                type: 'error',
+                                message: error.response?.data?.message || 'Failed to generate invite link.',
+                            });
+                        }
                     },
 
                     updateOrCreate(params, {resetForm, setErrors}) {
@@ -564,6 +686,14 @@
                                 this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
 
                                 this.$refs.datagrid.get();
+
+                                if (response.data.invite_link) {
+                                    this.showInviteLink({
+                                        link: response.data.invite_link,
+                                        email: response.data.data?.email,
+                                        name: response.data.data?.name,
+                                    });
+                                }
 
                                 resetForm();
                             }).catch(error => {

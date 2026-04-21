@@ -15,18 +15,27 @@ class PostHogService
 
     /**
      * Capture an analytics event.
+     *
+     * No-ops when PostHog isn't configured (api key empty or disabled flag
+     * set). Without this guard the static PostHog::$client property is
+     * uninitialized and every capture throws a fatal TypeError.
      */
     public static function capture(string $distinctId, string $event, array $properties = []): void
     {
-        if (config('posthog.disabled')) {
+        if (! config('posthog.api_key') || config('posthog.disabled')) {
             return;
         }
 
-        PostHog::capture([
-            'distinctId'  => $distinctId,
-            'event'       => $event,
-            'properties'  => $properties,
-        ]);
+        try {
+            PostHog::capture([
+                'distinctId'  => $distinctId,
+                'event'       => $event,
+                'properties'  => $properties,
+            ]);
+        } catch (\Throwable $e) {
+            // Don't let analytics take down the request path.
+            report($e);
+        }
     }
 
     /**
@@ -63,14 +72,18 @@ class PostHogService
      */
     public static function identify(string $distinctId, array $properties = []): void
     {
-        if (config('posthog.disabled')) {
+        if (! config('posthog.api_key') || config('posthog.disabled')) {
             return;
         }
 
-        PostHog::identify([
-            'distinctId'     => $distinctId,
-            'properties'     => $properties,
-        ]);
+        try {
+            PostHog::identify([
+                'distinctId'     => $distinctId,
+                'properties'     => $properties,
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /**
