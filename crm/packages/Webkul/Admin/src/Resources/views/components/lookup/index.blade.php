@@ -225,6 +225,12 @@
                 searchTerm(newVal, oldVal) {
                     this.search(this.preload);
                 },
+
+                showPopup(newVal) {
+                    if (! newVal) {
+                        this.previewItem = null;
+                    }
+                },
             },
 
             computed: {
@@ -310,6 +316,9 @@
 
                     this.selectedItem = item;
 
+                    // Dismiss any hover preview left over from mouseenter.
+                    this.previewItem = null;
+
                     this.$emit('on-selected', item);
                 },
 
@@ -373,6 +382,7 @@
                         ! lookup.contains(event.target)
                     ) {
                         this.showPopup = false;
+                        this.previewItem = null;
                     }
                 },
 

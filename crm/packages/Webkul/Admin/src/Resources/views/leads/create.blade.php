@@ -6,14 +6,23 @@
     {!! view_render_event('admin.leads.create.form.before') !!}
 
     <!-- Create Lead Form -->
-    <x-admin::form :action="route('admin.leads.store')">
+    <x-admin::form :action="route('admin.leads.store')" id="lead-create-form">
         <div class="flex flex-col gap-4">
-            <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+            <div class="sticky z-20 flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm shadow-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300" style="top: 73px;">
                 <div class="flex flex-col gap-2">
                     <x-admin::breadcrumbs name="leads.create" />
 
-                    <div class="text-xl font-bold dark:text-white">
-                        @lang('admin::app.leads.create.title')
+                    <div class="flex items-center gap-2">
+                        <div class="text-xl font-bold dark:text-white">
+                            @lang('admin::app.leads.create.title')
+                        </div>
+                        <span
+                            id="lead-draft-indicator"
+                            class="hidden rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                            data-testid="lead-draft-indicator"
+                        >
+                            Draft restored
+                        </span>
                     </div>
                 </div>
 
@@ -23,6 +32,15 @@
                     <!-- Save button for person -->
                     <div class="flex items-center gap-x-2.5">
                         {!! view_render_event('admin.leads.create.form_buttons.before') !!}
+
+                        <button
+                            type="button"
+                            class="secondary-button hidden"
+                            id="lead-draft-clear-btn"
+                            data-testid="lead-draft-clear-btn"
+                        >
+                            Discard draft
+                        </button>
 
                         <button
                             type="submit"
@@ -260,6 +278,170 @@
                     },
                 },
             });
+        </script>
+
+        <!-- Lead Draft Persistence — saves WIP form state to localStorage and restores on reload -->
+        <script type="module">
+            (function leadDraftPersistence() {
+                const DRAFT_KEY = 'crm-lead-draft-v1';
+                const DEBOUNCE_MS = 400;
+                const SKIP_TYPES = new Set(['password', 'file', 'submit', 'button', 'reset']);
+                const SKIP_NAMES = new Set(['_token', '_method']);
+
+                const getIndicator = () => document.getElementById('lead-draft-indicator');
+                const getClearBtn = () => document.getElementById('lead-draft-clear-btn');
+
+                const getForm = () => {
+                    // Prefer the id we set on the create form; fall back to the form
+                    // that contains the "title" attribute field, since the admin layout
+                    // renders other forms (e.g., logout) ahead of the lead form.
+                    const byId = document.getElementById('lead-create-form');
+                    if (byId && byId.tagName === 'FORM') return byId;
+                    const titleInput = document.querySelector('input[name="title"]');
+                    return titleInput?.closest('form') ?? null;
+                };
+
+                const canPersist = (el) => {
+                    if (! el || ! el.name) return false;
+                    if (SKIP_NAMES.has(el.name)) return false;
+                    if (el.type && SKIP_TYPES.has(el.type)) return false;
+                    return true;
+                };
+
+                const snapshot = () => {
+                    const form = getForm();
+                    if (! form) return {};
+                    const values = {};
+                    for (const el of form.elements) {
+                        if (! canPersist(el)) continue;
+
+                        if (el.type === 'checkbox') {
+                            values[el.name] = el.checked ? (el.value || '1') : '';
+                        } else if (el.type === 'radio') {
+                            if (el.checked) values[el.name] = el.value;
+                        } else {
+                            values[el.name] = el.value ?? '';
+                        }
+                    }
+                    return values;
+                };
+
+                const save = () => {
+                    const values = snapshot();
+                    if (! Object.keys(values).length) return;
+                    try {
+                        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+                            values,
+                            savedAt: Date.now(),
+                        }));
+                        showClearButton();
+                    } catch (_) { /* quota or private mode — ignore */ }
+                };
+
+                const clear = () => {
+                    try { localStorage.removeItem(DRAFT_KEY); } catch (_) {}
+                    const indicator = getIndicator();
+                    const clearBtn = getClearBtn();
+                    if (indicator) indicator.classList.add('hidden');
+                    if (clearBtn) clearBtn.classList.add('hidden');
+                };
+
+                const showClearButton = () => {
+                    const clearBtn = getClearBtn();
+                    if (clearBtn) clearBtn.classList.remove('hidden');
+                };
+
+                const restore = () => {
+                    const form = getForm();
+                    if (! form) return false;
+
+                    let payload;
+                    try {
+                        const raw = localStorage.getItem(DRAFT_KEY);
+                        if (! raw) return false;
+                        payload = JSON.parse(raw);
+                    } catch (_) { return false; }
+                    if (! payload?.values) return false;
+
+                    let restoredAny = false;
+                    for (const el of form.elements) {
+                        if (! canPersist(el)) continue;
+                        if (! (el.name in payload.values)) continue;
+
+                        const saved = payload.values[el.name];
+
+                        if (el.type === 'checkbox') {
+                            el.checked = !! saved;
+                        } else if (el.type === 'radio') {
+                            el.checked = (el.value === saved);
+                        } else if (el.value !== saved) {
+                            el.value = saved;
+                        }
+                        el.dispatchEvent(new Event('input', { bubbles: true }));
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                        restoredAny = true;
+                    }
+
+                    if (restoredAny) {
+                        const indicator = getIndicator();
+                        if (indicator) indicator.classList.remove('hidden');
+                        showClearButton();
+                    }
+                    return restoredAny;
+                };
+
+                // Debounce watcher.
+                let timer;
+                const scheduleSave = () => {
+                    clearTimeout(timer);
+                    timer = setTimeout(save, DEBOUNCE_MS);
+                };
+
+                // Delegate at document level so we catch fields rendered by Vue after mount.
+                const onAnyChange = (e) => {
+                    const form = getForm();
+                    if (! form || ! e.target || ! form.contains(e.target)) return;
+                    if (! canPersist(e.target)) return;
+                    scheduleSave();
+                };
+                document.addEventListener('input', onAnyChange, { passive: true });
+                document.addEventListener('change', onAnyChange, { passive: true });
+
+                // Clear on submit (draft survives if validation fails — no navigation).
+                document.addEventListener('submit', (e) => {
+                    const form = getForm();
+                    if (! form || e.target !== form) return;
+                    setTimeout(clear, 100);
+                });
+
+                document.addEventListener('click', (e) => {
+                    const btn = getClearBtn();
+                    if (! btn || e.target !== btn) return;
+                    if (confirm('Discard the saved draft? This will clear all fields you have not yet submitted.')) {
+                        clear();
+                        window.location.reload();
+                    }
+                });
+
+                // Poll for the form and its Vue-rendered inputs, then restore once ready.
+                let attempts = 0;
+                const attemptRestore = () => {
+                    attempts++;
+                    const form = getForm();
+                    if (form && form.elements.length >= 3) {
+                        restore();
+                        return;
+                    }
+                    if (attempts < 40) {
+                        setTimeout(attemptRestore, 100);
+                    }
+                };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', attemptRestore);
+                } else {
+                    attemptRestore();
+                }
+            })();
         </script>
     @endPushOnce
 
