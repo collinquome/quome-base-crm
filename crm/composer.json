@@ -18,19 +18,22 @@
         "konekt/concord": "^1.10",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.2",
+        "laravel/socialite": "^5.26",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^4.5",
         "maatwebsite/excel": "^3.1",
         "mpdf/mpdf": "^8.2",
+        "posthog/posthog-php": "^4.2",
         "prettus/l5-repository": "^2.7.9",
         "pusher/pusher-php-server": "^7.2",
         "smalot/pdfparser": "^2.11",
+        "socialiteproviders/microsoft": "^4.9",
         "webklex/laravel-imap": "^5.3"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.6",
         "fakerphp/faker": "^1.9.1",
-        "quome/quome-package-generator": "dev-master",
+
         "laravel/pint": "^1.16",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.2",
