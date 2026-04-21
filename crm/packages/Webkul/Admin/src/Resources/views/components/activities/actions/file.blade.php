@@ -176,6 +176,19 @@
                 }
             },
 
+            mounted() {
+                this._onOpenFileModal = () => {
+                    this.$refs.fileActivityModal?.open();
+                };
+                this.$emitter.on('activity:open-file-modal', this._onOpenFileModal);
+            },
+
+            beforeUnmount() {
+                if (this._onOpenFileModal) {
+                    this.$emitter.off('activity:open-file-modal', this._onOpenFileModal);
+                }
+            },
+
             methods: {
                 openModal(type) {
                     this.$refs.fileActivityModal.open();

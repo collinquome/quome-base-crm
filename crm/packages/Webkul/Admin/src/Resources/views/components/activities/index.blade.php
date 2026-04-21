@@ -44,8 +44,8 @@
                     {!! view_render_event('admin.components.activities.content.types.before') !!}
 
                     <div
-                        v-for="type in types"
-                        class="cursor-pointer px-3 py-2.5 text-sm font-medium dark:text-white"
+                        v-for="type in mergedTypes"
+                        class="cursor-pointer whitespace-nowrap px-3 py-2.5 text-sm font-medium dark:text-white"
                         :class="{'border-brandColor border-b-2 !text-brandColor transition': selectedType == type.name }"
                         @click="selectedType = type.name"
                     >
@@ -354,6 +354,16 @@
                                     <p class="text-gray-400 dark:text-gray-400">
                                         @{{ typeIllustrations[selectedType]?.description ?? typeIllustrations['all'].description }}
                                     </p>
+
+                                    <button
+                                        v-if="selectedType === 'file'"
+                                        type="button"
+                                        class="mt-3 rounded-md border border-cyan-300 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-800 transition-all hover:bg-cyan-100 dark:border-cyan-800 dark:bg-cyan-900/20 dark:text-cyan-300 dark:hover:bg-cyan-900/30"
+                                        @click="$emitter.emit('activity:open-file-modal')"
+                                        data-testid="activities-add-file-btn"
+                                    >
+                                        + Add File
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -404,23 +414,25 @@
                     default: [
                         {
                             name: 'all',
-                            label: "{{ trans('admin::app.components.activities.index.all') }}",
-                        }, {
-                            name: 'planned',
-                            label: "{{ trans('admin::app.components.activities.index.planned') }}",
-                        }, {
-                            name: 'note',
-                            label: "{{ trans('admin::app.components.activities.index.notes') }}",
-                        }, {
-                            name: 'call',
-                            label: "{{ trans('admin::app.components.activities.index.calls') }}",
-                        }, {
-                            name: 'meeting',
-                            label: "{{ trans('admin::app.components.activities.index.meetings') }}",
-                        }, {
-                            name: 'lunch',
-                            label: "{{ trans('admin::app.components.activities.index.lunches') }}",
-                        }, {
+                            label: "All Actions",
+                        },
+                        // {
+                        //     name: 'planned',
+                        //     label: "Planned",
+                        // }, {
+                        //     name: 'note',
+                        //     label: "Notes",
+                        // }, {
+                        //     name: 'call',
+                        //     label: "Calls",
+                        // }, {
+                        //     name: 'meeting',
+                        //     label: "Meetings",
+                        // }, {
+                        //     name: 'lunch',
+                        //     label: "Lunches",
+                        // },
+                        {
                             name: 'file',
                             label: "{{ trans('admin::app.components.activities.index.files') }}",
                         }, {
@@ -446,6 +458,8 @@
                     isUpdating: {},
 
                     activities: [],
+
+                    mergedTypes: [],
 
                     selectedType: this.activeType,
 
@@ -536,9 +550,9 @@
                 this.get();
 
                 if (this.extraTypes?.length) {
-                    this.extraTypes.forEach(type => {
-                        this.types.push(type);
-                    });
+                    this.mergedTypes = [...this.extraTypes, ...this.types];
+                } else {
+                    this.mergedTypes = [...this.types];
                 }
 
                 this.$emitter.on('on-activity-added', (activity) => this.activities.unshift(activity));
