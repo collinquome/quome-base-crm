@@ -111,42 +111,50 @@
                         :class="{ 'border-l-4': true, [urgencyBorderClass(action.due_date)]: true }"
                         data-testid="action-stream-item"
                     >
-                        <!-- Action Type Icon -->
-                        <div
-                            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full"
-                            :class="actionTypeIconBg(action.action_type)"
+                        <component
+                            :is="actionableUrl(action) ? 'a' : 'div'"
+                            :href="actionableUrl(action) || undefined"
+                            class="flex min-w-0 flex-1 items-center gap-4"
+                            :class="actionableUrl(action) ? 'cursor-pointer hover:[&_.action-title]:underline' : ''"
+                            data-testid="action-stream-item-link"
                         >
-                            <span :class="actionTypeIcon(action.action_type)" class="text-lg text-white"></span>
-                        </div>
+                            <!-- Action Type Icon -->
+                            <div
+                                class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full"
+                                :class="actionTypeIconBg(action.action_type)"
+                            >
+                                <span :class="actionTypeIcon(action.action_type)" class="text-lg text-white"></span>
+                            </div>
 
-                        <!-- Content -->
-                        <div class="min-w-0 flex-1">
-                            <div class="flex items-center gap-2">
-                                <span class="font-medium text-gray-900 dark:text-white" v-text="action.description || action.action_type"></span>
-                                <span
-                                    class="rounded-full px-2 py-0.5 text-xs font-medium"
-                                    :class="urgencyLabelClass(action.due_date)"
-                                    v-text="urgencyLabel(action.due_date)"
-                                    data-testid="action-urgency-badge"
-                                ></span>
-                                <span
-                                    class="rounded-full px-2 py-0.5 text-xs font-medium"
-                                    :class="priorityBadgeClass(action.priority)"
-                                    v-text="action.priority"
-                                ></span>
+                            <!-- Content -->
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="action-title font-medium text-gray-900 dark:text-white" v-text="action.description || action.action_type"></span>
+                                    <span
+                                        class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                        :class="urgencyLabelClass(action.due_date)"
+                                        v-text="urgencyLabel(action.due_date)"
+                                        data-testid="action-urgency-badge"
+                                    ></span>
+                                    <span
+                                        class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                        :class="priorityBadgeClass(action.priority)"
+                                        v-text="action.priority"
+                                    ></span>
+                                </div>
+                                <div class="mt-0.5 flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                                    <span v-if="action.actionable">
+                                        <span class="icon-contact text-xs"></span>
+                                        @{{ action.actionable?.name || action.actionable?.title || action.actionable_type + ' #' + action.actionable_id }}
+                                    </span>
+                                    <span v-if="action.due_date">
+                                        <span class="icon-calendar text-xs"></span>
+                                        @{{ formatDate(action.due_date) }}
+                                        <span v-if="action.due_time"> @{{ action.due_time }}</span>
+                                    </span>
+                                </div>
                             </div>
-                            <div class="mt-0.5 flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                                <span v-if="action.actionable">
-                                    <span class="icon-contact text-xs"></span>
-                                    @{{ action.actionable?.name || action.actionable?.title || action.actionable_type + ' #' + action.actionable_id }}
-                                </span>
-                                <span v-if="action.due_date">
-                                    <span class="icon-calendar text-xs"></span>
-                                    @{{ formatDate(action.due_date) }}
-                                    <span v-if="action.due_time"> @{{ action.due_time }}</span>
-                                </span>
-                            </div>
-                        </div>
+                        </component>
 
                         <!-- Actions -->
                         <div class="flex items-center gap-2">
@@ -371,6 +379,20 @@
                             normal: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
                             low: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
                         }[priority] || 'bg-gray-100 text-gray-600';
+                    },
+
+                    actionableUrl(action) {
+                        if (! action.actionable_id) return null;
+
+                        if (action.actionable_type === 'leads' || action.actionable_type === 'lead') {
+                            return `/admin/leads/view/${action.actionable_id}`;
+                        }
+
+                        if (action.actionable_type === 'persons' || action.actionable_type === 'person') {
+                            return `/admin/contacts/persons/view/${action.actionable_id}`;
+                        }
+
+                        return null;
                     },
 
                     actionTypeIcon(type) {
