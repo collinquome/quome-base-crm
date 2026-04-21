@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Webkul\Admin\Http\Controllers\Controller;
+use Webkul\Admin\Http\Controllers\User\AzureSsoController;
 use Webkul\Admin\Http\Controllers\User\ForgotPasswordController;
 use Webkul\Admin\Http\Controllers\User\ResetPasswordController;
 use Webkul\Admin\Http\Controllers\User\SessionController;
@@ -25,6 +26,15 @@ Route::withoutMiddleware(['user'])->group(function () {
         Route::middleware(['user'])->group(function () {
             Route::delete('logout', 'destroy')->name('admin.session.destroy');
         });
+    });
+
+    /**
+     * Azure SSO routes.
+     */
+    Route::controller(AzureSsoController::class)->prefix('auth/azure')->group(function () {
+        Route::get('redirect', 'redirect')->name('admin.azure.redirect');
+
+        Route::get('callback', 'callback')->name('admin.azure.callback');
     });
 
     /**

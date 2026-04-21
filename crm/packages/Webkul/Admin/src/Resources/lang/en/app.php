@@ -133,8 +133,8 @@ return [
                 ],
 
                 'activity' => [
-                    'btn'           => 'Activity',
-                    'title'         => 'Add Activity',
+                    'btn'           => 'Action',
+                    'title'         => 'Add Action',
                     'title-control' => 'Title',
                     'description'   => 'Description',
                     'schedule-from' => 'Schedule From',
@@ -617,8 +617,8 @@ return [
                         ],
 
                         'activity' => [
-                            'btn'           => 'Activity',
-                            'title'         => 'Add Activity',
+                            'btn'           => 'Action',
+                            'title'         => 'Add Action',
                             'title-control' => 'Title',
                             'description'   => 'Description',
                             'schedule-from' => 'Schedule From',

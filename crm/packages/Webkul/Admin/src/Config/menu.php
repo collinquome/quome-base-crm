@@ -13,13 +13,24 @@ return [
     ],
 
     /**
+     * Actions.
+     */
+    [
+        'key'        => 'action-stream',
+        'name'       => 'Actions',
+        'route'      => 'admin.action-stream.index',
+        'sort'       => 2,
+        'icon-class' => 'icon-activity',
+    ],
+
+    /**
      * Leads / Deals.
      */
     [
         'key'        => 'leads',
         'name'       => 'admin::app.layouts.leads',
         'route'      => 'admin.leads.index',
-        'sort'       => 2,
+        'sort'       => 3,
         'icon-class' => 'icon-leads',
     ],
 
@@ -85,17 +96,6 @@ return [
         'route'      => 'admin.mail.email_accounts.index',
         'sort'       => 6,
         'icon-class' => '',
-    ],
-
-    /**
-     * Activities.
-     */
-    [
-        'key'        => 'activities',
-        'name'       => 'admin::app.layouts.activities',
-        'route'      => 'admin.activities.index',
-        'sort'       => 5,
-        'icon-class' => 'icon-activity',
     ],
 
     /**
@@ -294,14 +294,4 @@ return [
         'icon-class' => 'icon-configuration',
     ],
 
-    /**
-     * Action Stream (accessible via route, not primary sidebar).
-     */
-    [
-        'key'        => 'action-stream',
-        'name'       => 'Action Stream',
-        'route'      => 'admin.action-stream.index',
-        'sort'       => 10,
-        'icon-class' => 'icon-activity',
-    ],
 ];

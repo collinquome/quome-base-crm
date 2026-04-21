@@ -44,3 +44,4 @@ mobile/.expo/
 
 # Extension build
 extension/dist/
+.env

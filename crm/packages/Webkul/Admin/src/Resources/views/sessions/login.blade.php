@@ -110,6 +110,24 @@
                 </x-admin::form>
 
                 {!! view_render_event('admin.sessions.login.form_controls.after') !!}
+
+                @if (env('AZURE_SSO_ENABLED'))
+                    <div class="border-t px-4 py-4 dark:border-gray-800">
+                        <a
+                            href="{{ route('admin.azure.redirect') }}"
+                            class="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                            data-testid="azure-sso-btn"
+                        >
+                            <svg class="h-5 w-5" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+                                <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+                                <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+                                <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+                            </svg>
+                            Sign in with Microsoft
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
 

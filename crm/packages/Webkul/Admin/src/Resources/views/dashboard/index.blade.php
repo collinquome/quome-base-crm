@@ -33,6 +33,9 @@
 
     {!! view_render_event('admin.dashboard.index.header.after') !!}
 
+    <!-- Action Stream (Dashboard) -->
+    <v-dashboard-action-stream data-testid="dashboard-action-stream"></v-dashboard-action-stream>
+
     <!-- Body Component -->
     {!! view_render_event('admin.dashboard.index.content.before') !!}
 
@@ -92,6 +95,115 @@
             type="module"
             src="https://cdn.jsdelivr.net/npm/chartjs-chart-funnel@4.2.1/build/index.umd.min.js"
         >
+        </script>
+
+        <script
+            type="text/x-template"
+            id="v-dashboard-action-stream-template"
+        >
+            <div class="mb-4 rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900" data-testid="dashboard-action-stream-panel">
+                <div class="flex items-center justify-between border-b border-gray-200 px-4 py-2.5 dark:border-gray-800">
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-white">Action Stream</h3>
+                        <span
+                            v-if="overdueCount > 0"
+                            class="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                            data-testid="dashboard-overdue-badge"
+                        >
+                            @{{ overdueCount }} overdue
+                        </span>
+                    </div>
+                    <a
+                        href="/admin/action-stream"
+                        class="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+                        data-testid="action-stream-view-all"
+                    >
+                        View All
+                    </a>
+                </div>
+
+                <!-- Loading -->
+                <div v-if="isLoading" class="space-y-2 p-4">
+                    <div v-for="n in 3" :key="n" class="flex animate-pulse items-center gap-3">
+                        <div class="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                        <div class="flex-1 space-y-1">
+                            <div class="h-3.5 w-2/3 rounded bg-gray-200 dark:bg-gray-700"></div>
+                            <div class="h-3 w-1/3 rounded bg-gray-200 dark:bg-gray-700"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty -->
+                <div v-else-if="actions.length === 0" class="flex items-center gap-2 px-4 py-4 text-sm text-gray-400 dark:text-gray-500" data-testid="dashboard-action-stream-empty">
+                    <span class="icon-activity text-base"></span>
+                    No pending actions — you're all caught up!
+                </div>
+
+                <!-- Action Items -->
+                <div v-else class="divide-y divide-gray-100 dark:divide-gray-800" data-testid="dashboard-action-stream-list">
+                    <div
+                        v-for="action in actions"
+                        :key="action.id"
+                        class="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                        :class="{ 'border-l-3': true, [urgencyBorderClass(action.due_date)]: true }"
+                        data-testid="dashboard-action-stream-item"
+                    >
+                        <!-- Type Icon -->
+                        <div
+                            class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full"
+                            :class="actionTypeIconBg(action.action_type)"
+                        >
+                            <span :class="actionTypeIcon(action.action_type)" class="text-sm text-white"></span>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5">
+                                <span class="truncate text-sm font-medium text-gray-900 dark:text-white">
+                                    @{{ action.description || action.action_type }}
+                                </span>
+                                <span
+                                    class="flex-shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+                                    :class="urgencyLabelClass(action.due_date)"
+                                >
+                                    @{{ urgencyLabel(action.due_date) }}
+                                </span>
+                                <span
+                                    class="flex-shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+                                    :class="priorityBadgeClass(action.priority)"
+                                >
+                                    @{{ action.priority }}
+                                </span>
+                            </div>
+                            <div class="mt-0.5 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                <a
+                                    v-if="action.actionable"
+                                    :href="entityLink(action)"
+                                    class="hover:text-blue-600 hover:underline dark:hover:text-blue-400"
+                                    @click.stop
+                                >
+                                    <span class="icon-contact text-[10px]"></span>
+                                    @{{ action.actionable?.name || action.actionable?.title || action.actionable_type + ' #' + action.actionable_id }}
+                                </a>
+                                <span v-if="action.due_date">
+                                    <span class="icon-calendar text-[10px]"></span>
+                                    @{{ formatDate(action.due_date) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Complete Button -->
+                        <button
+                            type="button"
+                            class="flex-shrink-0 rounded-md border border-green-600 bg-green-600 px-2.5 py-1 text-xs font-semibold text-white transition-all hover:bg-green-700 hover:border-green-700"
+                            @click="completeAction(action.id)"
+                            data-testid="dashboard-action-complete-btn"
+                        >
+                            Complete
+                        </button>
+                    </div>
+                </div>
+            </div>
         </script>
 
         <script
@@ -161,6 +273,120 @@
             </div>
 
             {!! view_render_event('admin.dashboard.index.date_filters.after') !!}
+        </script>
+
+        <script type="module">
+            app.component('v-dashboard-action-stream', {
+                template: '#v-dashboard-action-stream-template',
+
+                data() {
+                    return {
+                        actions: [],
+                        isLoading: true,
+                        overdueCount: 0,
+                    };
+                },
+
+                mounted() {
+                    this.fetchActions();
+                    this.fetchOverdueCount();
+                },
+
+                methods: {
+                    async fetchActions() {
+                        this.isLoading = true;
+                        try {
+                            const response = await this.$axios.get('/admin/action-stream/stream', {
+                                params: { per_page: 10 },
+                            });
+                            this.actions = response.data?.data || [];
+                        } catch {
+                            this.actions = [];
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
+
+                    async fetchOverdueCount() {
+                        try {
+                            const response = await this.$axios.get('/admin/action-stream/overdue-count');
+                            this.overdueCount = response.data?.data?.overdue_count || 0;
+                        } catch {
+                            this.overdueCount = 0;
+                        }
+                    },
+
+                    async completeAction(id) {
+                        try {
+                            await this.$axios.post(`/admin/action-stream/${id}/complete`);
+                            this.actions = this.actions.filter(a => a.id !== id);
+                            this.fetchOverdueCount();
+                        } catch (error) {
+                            console.error('Failed to complete action:', error);
+                        }
+                    },
+
+                    entityLink(action) {
+                        if (action.actionable_type === 'leads') {
+                            return `/admin/leads/view/${action.actionable_id}`;
+                        }
+                        if (action.actionable_type === 'persons') {
+                            return `/admin/contacts/persons/view/${action.actionable_id}`;
+                        }
+                        return '#';
+                    },
+
+                    formatDate(dateStr) {
+                        if (!dateStr) return '';
+                        const date = new Date(dateStr);
+                        const today = new Date();
+                        const tomorrow = new Date(today);
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        if (date.toDateString() === today.toDateString()) return 'Today';
+                        if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+                        const diff = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
+                        if (diff < 0) return `${Math.abs(diff)}d overdue`;
+                        if (diff <= 7) return `In ${diff}d`;
+                        return date.toLocaleDateString();
+                    },
+
+                    calculateUrgency(dueDate) {
+                        if (!dueDate) return 'none';
+                        const today = new Date(); today.setHours(0,0,0,0);
+                        const due = new Date(dueDate); due.setHours(0,0,0,0);
+                        const diffDays = Math.floor((due - today) / (1000*60*60*24));
+                        if (diffDays < 0) return 'overdue';
+                        if (diffDays === 0) return 'today';
+                        if (diffDays <= 7) return 'this_week';
+                        return 'upcoming';
+                    },
+
+                    urgencyBorderClass(dueDate) {
+                        return { overdue: '!border-l-red-500', today: '!border-l-orange-500', this_week: '!border-l-yellow-500', upcoming: '!border-l-green-500', none: '!border-l-gray-400' }[this.calculateUrgency(dueDate)] || '!border-l-gray-300';
+                    },
+
+                    urgencyLabel(dueDate) {
+                        return { overdue: 'Overdue', today: 'Due Today', this_week: 'This Week', upcoming: 'Upcoming', none: 'No Date' }[this.calculateUrgency(dueDate)] || '';
+                    },
+
+                    urgencyLabelClass(dueDate) {
+                        const u = this.calculateUrgency(dueDate);
+                        return { overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', today: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400', this_week: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400', upcoming: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400', none: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400' }[u] || 'bg-gray-100 text-gray-500';
+                    },
+
+                    priorityBadgeClass(priority) {
+                        return { urgent: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', high: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400', normal: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', low: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' }[priority] || 'bg-gray-100 text-gray-600';
+                    },
+
+                    actionTypeIcon(type) {
+                        return { call: 'icon-call', email: 'icon-mail', meeting: 'icon-activity', task: 'icon-checkbox-outline', custom: 'icon-note' }[type] || 'icon-activity';
+                    },
+
+                    actionTypeIconBg(type) {
+                        return { call: 'bg-cyan-500', email: 'bg-green-500', meeting: 'bg-blue-500', task: 'bg-purple-500', custom: 'bg-orange-500' }[type] || 'bg-gray-500';
+                    },
+                },
+            });
         </script>
 
         <script type="module">

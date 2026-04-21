@@ -11,7 +11,7 @@ test.describe('Next Action Widget - Lead Page', () => {
   });
 
   test('widget renders on lead detail page', async ({ page }) => {
-    await page.goto('/admin/leads/view/194');
+    await page.goto('/admin/leads/view/3');
     await page.waitForLoadState('networkidle');
 
     const widget = page.locator('[data-testid="next-action-widget"]');
@@ -22,7 +22,7 @@ test.describe('Next Action Widget - Lead Page', () => {
   });
 
   test('action history section is visible', async ({ page }) => {
-    await page.goto('/admin/leads/view/194');
+    await page.goto('/admin/leads/view/3');
     await page.waitForLoadState('networkidle');
 
     const history = page.locator('[data-testid="action-history-section"]');
@@ -31,7 +31,7 @@ test.describe('Next Action Widget - Lead Page', () => {
   });
 
   test('widget shows empty state, current action, or new button', async ({ page }) => {
-    await page.goto('/admin/leads/view/194');
+    await page.goto('/admin/leads/view/3');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
@@ -48,7 +48,7 @@ test.describe('Next Action Widget - Lead Page', () => {
   });
 
   test('clicking New/Set-one-now opens create form with all fields', async ({ page }) => {
-    await page.goto('/admin/leads/view/194');
+    await page.goto('/admin/leads/view/3');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
@@ -72,7 +72,7 @@ test.describe('Next Action Widget - Lead Page', () => {
   });
 
   test('save button is disabled when description is empty', async ({ page }) => {
-    await page.goto('/admin/leads/view/194');
+    await page.goto('/admin/leads/view/3');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
@@ -93,7 +93,7 @@ test.describe('Next Action Widget - Lead Page', () => {
     const ts = Date.now();
     const description = `Follow up call ${ts}`;
 
-    await page.goto('/admin/leads/view/194');
+    await page.goto('/admin/leads/view/3');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
@@ -145,7 +145,7 @@ test.describe('Next Action Widget - Lead Page', () => {
     const ts = Date.now();
     const description = `Complete me ${ts}`;
 
-    await page.goto('/admin/leads/view/194');
+    await page.goto('/admin/leads/view/3');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
@@ -193,7 +193,7 @@ test.describe('Next Action Widget - Lead Page', () => {
   });
 
   test('cancel button hides form without saving', async ({ page }) => {
-    await page.goto('/admin/leads/view/194');
+    await page.goto('/admin/leads/view/3');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
@@ -213,7 +213,7 @@ test.describe('Next Action Widget - Lead Page', () => {
   });
 
   test('action-stream list API returns correct response via session auth', async ({ page }) => {
-    await page.goto('/admin/leads/view/194');
+    await page.goto('/admin/leads/view/3');
     await page.waitForLoadState('networkidle');
 
     // The widget automatically fetches from /admin/action-stream/list on mount
@@ -231,7 +231,7 @@ test.describe('Next Action Widget - Lead Page', () => {
   });
 
   test('completed count displays in history section', async ({ page }) => {
-    await page.goto('/admin/leads/view/194');
+    await page.goto('/admin/leads/view/3');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
