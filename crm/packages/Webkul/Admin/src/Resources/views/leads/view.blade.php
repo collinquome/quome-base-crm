@@ -91,10 +91,15 @@
                         entity-control-name="lead_id"
                     />
 
-                    <x-admin::activities.actions.activity
-                        :entity="$lead"
-                        entity-control-name="lead_id"
-                    />
+                    <button
+                        type="button"
+                        class="flex h-[74px] w-[84px] flex-col items-center justify-center gap-1 rounded-lg border border-transparent bg-blue-200 font-medium text-blue-800 transition-all hover:border-blue-400"
+                        @click="$emitter.emit('next-action:open-create', { entityType: 'lead', entityId: {{ $lead->id }} })"
+                        data-testid="lead-add-next-action-btn"
+                    >
+                        <span class="icon-activity text-2xl dark:!text-blue-800"></span>
+                        Next Action
+                    </button>
                 @endif
 
                 {!! view_render_event('admin.leads.view.actions.after', ['lead' => $lead]) !!}

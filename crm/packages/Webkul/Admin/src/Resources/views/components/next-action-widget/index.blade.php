@@ -114,7 +114,7 @@
                             </button>
                             <button
                                 type="button"
-                                class="rounded-md border border-blue-600 bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 cursor-pointer"
+                                class="rounded-md border border-blue-600 bg-blue-600 px-3 py-1.5 text-xs font-medium text-black hover:bg-blue-700 cursor-pointer"
                                 :disabled="updating"
                                 @click="saveEdit"
                                 data-testid="edit-action-save-btn"
@@ -200,7 +200,7 @@
                             <button
                                 type="button"
                                 class="rounded-md border px-3 py-1.5 text-xs font-medium"
-                                :class="(!newAction.description || saving) ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400' : 'bg-blue-600 border-blue-600 text-white hover:bg-blue-700 cursor-pointer'"
+                                :class="(!newAction.description || saving) ? 'bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400' : 'bg-blue-600 border-blue-600 text-black hover:bg-blue-700 cursor-pointer'"
                                 @click="createAction"
                                 :disabled="!newAction.description || saving"
                                 data-testid="next-action-save-btn"
@@ -336,6 +336,24 @@
 
             mounted() {
                 this.fetchActions();
+
+                this._onOpenCreate = (payload) => {
+                    if (! payload) return;
+                    if (payload.entityType !== this.entityType) return;
+                    if (Number(payload.entityId) !== Number(this.entityId)) return;
+
+                    this.showCreateForm = true;
+                    this.$nextTick(() => {
+                        this.$el?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+                    });
+                };
+                this.$emitter.on('next-action:open-create', this._onOpenCreate);
+            },
+
+            beforeUnmount() {
+                if (this._onOpenCreate) {
+                    this.$emitter.off('next-action:open-create', this._onOpenCreate);
+                }
             },
 
             methods: {
