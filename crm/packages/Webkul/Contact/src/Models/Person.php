@@ -43,6 +43,7 @@ class Person extends Model implements PersonContract
     protected $casts = [
         'emails'          => 'array',
         'contact_numbers' => 'array',
+        'address'         => 'array',
     ];
 
     /**
@@ -54,6 +55,7 @@ class Person extends Model implements PersonContract
         'name',
         'emails',
         'contact_numbers',
+        'address',
         'job_title',
         'user_id',
         'organization_id',

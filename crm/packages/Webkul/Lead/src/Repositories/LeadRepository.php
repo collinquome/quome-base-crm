@@ -114,13 +114,20 @@ class LeadRepository extends Repository
     {
         /**
          * If a person is provided, create or update the person and set the `person_id`.
+         * Inherit the lead's user_id (falling back to the auth user) so Individual /
+         * Group-scoped users can see the contact they just created as part of the lead.
          */
         if (isset($data['person'])) {
             if (! empty($data['person']['id'])) {
                 $person = $this->personRepository->findOrFail($data['person']['id']);
             } else {
+                $ownerId = $data['user_id']
+                    ?? ($data['person']['user_id'] ?? null)
+                    ?? auth()->guard('user')->id();
+
                 $person = $this->personRepository->create(array_merge($data['person'], [
                     'entity_type' => 'persons',
+                    'user_id'     => $ownerId,
                 ]));
             }
 
@@ -170,8 +177,13 @@ class LeadRepository extends Repository
             if (! empty($data['person']['id'])) {
                 $person = $this->personRepository->findOrFail($data['person']['id']);
             } else {
+                $ownerId = $data['user_id']
+                    ?? ($data['person']['user_id'] ?? null)
+                    ?? auth()->guard('user')->id();
+
                 $person = $this->personRepository->create(array_merge($data['person'], [
                     'entity_type' => 'persons',
+                    'user_id'     => $ownerId,
                 ]));
             }
 

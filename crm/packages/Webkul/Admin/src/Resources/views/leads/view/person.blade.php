@@ -94,6 +94,26 @@
                         @endforeach
         
                         {!! view_render_event('admin.leads.view.person.contact_numbers.after', ['lead' => $lead]) !!}
+
+                        @php
+                            $personAddress = is_string($lead->person->address ?? null)
+                                ? json_decode($lead->person->address, true)
+                                : ($lead->person->address ?? null);
+                            $addressLine = collect([
+                                $personAddress['address'] ?? null,
+                                $personAddress['city'] ?? null,
+                                $personAddress['state'] ?? null,
+                                $personAddress['postcode'] ?? null,
+                                $personAddress['country'] ?? null,
+                            ])->filter()->join(', ');
+                        @endphp
+
+                        @if ($addressLine)
+                            <div class="flex items-start gap-1 text-gray-700 dark:text-gray-300">
+                                <span class="icon-location mt-0.5 text-sm"></span>
+                                <span class="whitespace-pre-line">{{ $addressLine }}</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </x-slot>
