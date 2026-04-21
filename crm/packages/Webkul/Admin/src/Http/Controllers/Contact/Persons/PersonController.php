@@ -122,20 +122,41 @@ class PersonController extends Controller
 
     /**
      * Search person results.
+     *
+     * Supports both the Prettus RequestCriteria params (?search=&searchFields=)
+     * and the lookup component's `?query=` param. The `query` path does a
+     * case-insensitive LIKE against name, emails (JSON), and contact_numbers
+     * (JSON) so that typing an email or phone surfaces the matching person.
      */
     public function search(): JsonResource
     {
+        $term = trim((string) request()->input('query', ''));
+
+        $query = $this->personRepository->getModel()->query();
+
         if ($userIds = bouncer()->getAuthorizedUserIds()) {
-            $persons = $this->personRepository
-                ->pushCriteria(app(RequestCriteria::class))
-                ->findWhereIn('user_id', $userIds);
-        } else {
-            $persons = $this->personRepository
-                ->pushCriteria(app(RequestCriteria::class))
-                ->all();
+            $query->whereIn('user_id', $userIds);
         }
 
-        return PersonResource::collection($persons);
+        if ($term !== '') {
+            $like = '%'.$term.'%';
+            $query->where(function ($q) use ($like) {
+                $q->where('name', 'LIKE', $like)
+                    ->orWhereRaw("JSON_SEARCH(LOWER(JSON_UNQUOTE(emails)), 'one', ?) IS NOT NULL", [strtolower($like)])
+                    ->orWhereRaw("JSON_SEARCH(LOWER(JSON_UNQUOTE(contact_numbers)), 'one', ?) IS NOT NULL", [strtolower($like)]);
+            });
+        } else {
+            // No query — fall back to stock RequestCriteria behavior (supports ?search=).
+            $query = $this->personRepository
+                ->pushCriteria(app(RequestCriteria::class))
+                ->getModel()
+                ->query();
+            if ($userIds = bouncer()->getAuthorizedUserIds()) {
+                $query->whereIn('user_id', $userIds);
+            }
+        }
+
+        return PersonResource::collection($query->orderBy('name')->take(25)->get());
     }
 
     /**

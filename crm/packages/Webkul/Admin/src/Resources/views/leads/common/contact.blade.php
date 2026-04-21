@@ -35,6 +35,25 @@
             />
 
             <x-admin::form.control-group.error control-name="person[id]" />
+
+            <!-- Duplicate-contact suggestion -->
+            <div
+                v-if="suggestedPerson && !person.id"
+                class="mt-2 flex items-center justify-between gap-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm dark:border-amber-700 dark:bg-amber-900/20"
+                data-testid="contact-duplicate-suggestion"
+            >
+                <div class="text-amber-800 dark:text-amber-300">
+                    <span class="font-semibold">@{{ suggestedPerson.name }}</span> already has this @{{ suggestedMatchField }} on file.
+                </div>
+                <button
+                    type="button"
+                    class="rounded-md border border-amber-500 bg-amber-500 px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
+                    @click="useSuggestedPerson"
+                    data-testid="contact-duplicate-use-existing"
+                >
+                    Use this contact
+                </button>
+            </div>
         </x-admin::form.control-group>
 
         <!-- Person Email -->
@@ -110,6 +129,11 @@
                     },
 
                     persons: [],
+
+                    // Duplicate-contact suggestion state.
+                    suggestedPerson: null,
+                    suggestedMatchField: '',
+                    _duplicateCheckTimer: null,
                 }
             },
 
@@ -131,9 +155,108 @@
                 }
             },
 
+            watch: {
+                'person.id'() {
+                    if (this.person?.id) {
+                        this.suggestedPerson = null;
+                    }
+                },
+            },
+
+            mounted() {
+                // The email/phone sub-components manage their own internal state
+                // and don't propagate two-way to `person.emails` / `person.contact_numbers`.
+                // Watch DOM input events on the document instead. v-contact-component
+                // may have multiple root nodes (fragment) so $el-scoping is unreliable.
+                this._onDomInput = (e) => {
+                    const t = e.target;
+                    if (! t?.name) return;
+                    if (t.name.includes('[emails]') || t.name.includes('[contact_numbers]')) {
+                        this.scheduleDuplicateCheck();
+                    }
+                };
+                document.addEventListener('input', this._onDomInput, { passive: true });
+                document.addEventListener('change', this._onDomInput, { passive: true });
+            },
+
+            beforeUnmount() {
+                if (this._onDomInput) {
+                    document.removeEventListener('input', this._onDomInput);
+                    document.removeEventListener('change', this._onDomInput);
+                }
+                if (this._duplicateCheckTimer) clearTimeout(this._duplicateCheckTimer);
+            },
+
             methods: {
                 addPerson (person) {
                     this.person = person;
+                    this.suggestedPerson = null;
+                },
+
+                useSuggestedPerson() {
+                    if (this.suggestedPerson) {
+                        this.addPerson({ ...this.suggestedPerson });
+                    }
+                },
+
+                scheduleDuplicateCheck() {
+                    if (this.person?.id) {
+                        this.suggestedPerson = null;
+                        return;
+                    }
+                    if (this._duplicateCheckTimer) clearTimeout(this._duplicateCheckTimer);
+                    this._duplicateCheckTimer = setTimeout(() => this.checkForDuplicate(), 500);
+                },
+
+                async checkForDuplicate() {
+                    // Collect non-empty email/phone values from the live DOM.
+                    // Use document scope because the component may be a fragment.
+                    const emails = Array.from(document.querySelectorAll('input[name*="[emails]"][name$="[value]"]'))
+                        .map(el => el.value.trim()).filter(Boolean);
+                    const phones = Array.from(document.querySelectorAll('input[name*="[contact_numbers]"][name$="[value]"]'))
+                        .map(el => el.value.trim()).filter(Boolean);
+
+                    for (const email of emails) {
+                        if (email.length < 5 || !email.includes('@')) continue;
+                        const hit = await this.lookupByValue(email, 'email');
+                        if (hit) {
+                            this.suggestedPerson = hit;
+                            this.suggestedMatchField = 'email';
+                            return;
+                        }
+                    }
+                    for (const phone of phones) {
+                        if (phone.replace(/\D/g, '').length < 6) continue;
+                        const hit = await this.lookupByValue(phone, 'phone');
+                        if (hit) {
+                            this.suggestedPerson = hit;
+                            this.suggestedMatchField = 'phone number';
+                            return;
+                        }
+                    }
+                    this.suggestedPerson = null;
+                },
+
+                async lookupByValue(value, kind) {
+                    try {
+                        const response = await this.$axios.get(this.src, {
+                            params: { query: value },
+                        });
+                        const matches = response.data?.data || [];
+                        for (const candidate of matches) {
+                            if (kind === 'email') {
+                                const emailMatch = (candidate.emails || []).some(e => (e?.value || '').toLowerCase() === value.toLowerCase());
+                                if (emailMatch) return candidate;
+                            } else {
+                                const normalized = value.replace(/\D/g, '');
+                                const phoneMatch = (candidate.contact_numbers || []).some(p => (p?.value || '').replace(/\D/g, '') === normalized);
+                                if (phoneMatch) return candidate;
+                            }
+                        }
+                    } catch (_) {
+                        /* network / 500 — silently skip */
+                    }
+                    return null;
                 },
             }
         });
