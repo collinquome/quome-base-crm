@@ -147,14 +147,29 @@ class ProductController extends Controller
     }
 
     /**
-     * Search product results
+     * Search product results.
+     *
+     * The lookup component sends a `query` param (not the `search` param that
+     * Prettus RequestCriteria expects), so we apply the filter explicitly with
+     * a case-insensitive LIKE against name and sku. The collation is already
+     * utf8mb4_unicode_ci, so LIKE is case-insensitive in MySQL by default.
      */
     public function search(): JsonResource
     {
-        $products = $this->productRepository
-            ->pushCriteria(app(RequestCriteria::class))
-            ->orderBy('created_at', 'desc')
-            ->take(5)
+        $term = trim((string) request()->input('query', ''));
+
+        $query = $this->productRepository->getModel()->query();
+
+        if ($term !== '') {
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('sku', 'LIKE', '%'.$term.'%');
+            });
+        }
+
+        $products = $query
+            ->orderBy('name', 'asc')
+            ->take(20)
             ->get();
 
         return ProductResource::collection($products);

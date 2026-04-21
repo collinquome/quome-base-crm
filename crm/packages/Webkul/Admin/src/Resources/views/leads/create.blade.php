@@ -165,6 +165,7 @@
                                                 'after:' .  \Carbon\Carbon::yesterday()->format('Y-m-d')
                                             ],
                                         ]"
+                                        :defaults="['user_id' => auth()->guard('user')->id()]"
                                     />
                                 </div>
                             </div>

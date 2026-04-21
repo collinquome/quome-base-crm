@@ -1,3 +1,10 @@
+@props([
+    'customAttributes',
+    'customValidations' => [],
+    'entity'            => null,
+    'defaults'          => [],
+])
+
 @foreach ($customAttributes as $attribute)
     @php
         $validations = [];
@@ -13,6 +20,8 @@
         $validations[] = $attribute->validation;
 
         $validations = implode('|', array_filter($validations));
+
+        $resolvedValue = isset($entity) ? $entity[$attribute->code] : ($defaults[$attribute->code] ?? null);
     @endphp
 
     <x-admin::form.control-group class="mb-2.5 w-full">
@@ -31,7 +40,7 @@
             <x-admin::attributes.edit.index
                 :attribute="$attribute"
                 :validations="$validations"
-                :value="isset($entity) ? $entity[$attribute->code] : null"
+                :value="$resolvedValue"
             />
         @endif
 
