@@ -85,7 +85,9 @@ return [
         'users' => [
             'provider' => 'users',
             'table'    => 'user_password_resets',
-            'expire'   => 60,
+            // 1 week — magic-link invites need room for an invitee to check
+            // email / claim the account on their own schedule.
+            'expire'   => 60 * 24 * 7,
         ],
     ],
 

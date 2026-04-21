@@ -496,7 +496,7 @@
                             @click.self="closeInviteModal"
                             data-testid="invite-link-modal"
                         >
-                            <div class="max-h-[90vh] w-full max-w-xl overflow-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900">
+                            <div class="max-h-[90vh] w-3/4 max-w-xl overflow-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900">
                                 <div class="mb-3 flex items-center justify-between">
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                                         Magic link ready for @{{ inviteModal.name || inviteModal.email }}
@@ -507,7 +507,7 @@
                                 </div>
 
                                 <p class="mb-3 text-sm text-gray-600 dark:text-gray-300">
-                                    Share this link with <strong v-text="inviteModal.email"></strong>. The first time they open it, they'll be prompted to set their password and will be signed in. The link is tied to their email and expires in 60 minutes.
+                                    Share this link with <strong v-text="inviteModal.email"></strong>. The first time they open it, they'll be prompted to set their password and will be signed in. The link is tied to their email and expires in 1 week.
                                 </p>
 
                                 <div class="flex gap-2">
