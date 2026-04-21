@@ -47,6 +47,24 @@ abstract class AbstractReporting
         if (request()->filled('user_id')) {
             $this->userId = (int) request()->input('user_id');
         }
+
+        // Enforce the authenticated user's view_permission on the reporting
+        // scope. Producers (view_permission = individual) can only see their
+        // own leads on the dashboard, regardless of any user_id they pass in.
+        // Global users can query any id they want; group users fall back to
+        // their own id when they didn't pass one or passed one outside the
+        // allowed set.
+        if (auth()->guard('user')->check()) {
+            $authorized = bouncer()->getAuthorizedUserIds();
+            if ($authorized !== null) {
+                $authId = auth()->guard('user')->id();
+                if ($this->userId === null) {
+                    $this->userId = $authId;
+                } elseif (! in_array($this->userId, $authorized, true)) {
+                    $this->userId = $authId;
+                }
+            }
+        }
     }
 
     /**
