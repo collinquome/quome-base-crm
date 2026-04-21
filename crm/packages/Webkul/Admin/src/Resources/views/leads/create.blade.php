@@ -351,17 +351,21 @@
                     if (clearBtn) clearBtn.classList.remove('hidden');
                 };
 
+                let restoreDone = false;
+
                 const restore = () => {
+                    if (restoreDone) return false;
+
                     const form = getForm();
                     if (! form) return false;
 
                     let payload;
                     try {
                         const raw = localStorage.getItem(DRAFT_KEY);
-                        if (! raw) return false;
+                        if (! raw) { restoreDone = true; return false; }
                         payload = JSON.parse(raw);
-                    } catch (_) { return false; }
-                    if (! payload?.values) return false;
+                    } catch (_) { restoreDone = true; return false; }
+                    if (! payload?.values) { restoreDone = true; return false; }
 
                     let restoredAny = false;
                     for (const el of form.elements) {
@@ -369,18 +373,29 @@
                         if (! (el.name in payload.values)) continue;
 
                         const saved = payload.values[el.name];
+                        let changed = false;
 
                         if (el.type === 'checkbox') {
-                            el.checked = !! saved;
+                            const want = !! saved;
+                            if (el.checked !== want) { el.checked = want; changed = true; }
                         } else if (el.type === 'radio') {
-                            el.checked = (el.value === saved);
+                            const want = (el.value === saved);
+                            if (el.checked !== want) { el.checked = want; changed = true; }
                         } else if (el.value !== saved) {
                             el.value = saved;
+                            changed = true;
                         }
-                        el.dispatchEvent(new Event('input', { bubbles: true }));
-                        el.dispatchEvent(new Event('change', { bubbles: true }));
-                        restoredAny = true;
+
+                        if (changed) {
+                            // Only fire events when we actually changed something, to avoid
+                            // fighting Vue's reactivity on fields that were already correct.
+                            el.dispatchEvent(new Event('input', { bubbles: true }));
+                            el.dispatchEvent(new Event('change', { bubbles: true }));
+                            restoredAny = true;
+                        }
                     }
+
+                    restoreDone = true;
 
                     if (restoredAny) {
                         const indicator = getIndicator();

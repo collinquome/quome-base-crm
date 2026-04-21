@@ -85,7 +85,10 @@
             "Webkul\\Notification\\": "packages/Webkul/Notification/src",
             "Webkul\\ReportBuilder\\": "packages/Webkul/ReportBuilder/src",
             "Webkul\\PublicApi\\": "packages/Webkul/PublicApi/src"
-        }
+        },
+        "files": [
+            "app/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

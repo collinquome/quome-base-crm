@@ -78,7 +78,7 @@
             <div class="flex flex-wrap gap-2 p-4">
                 {!! view_render_event('admin.leads.view.actions.before', ['lead' => $lead]) !!}
 
-                @if (bouncer()->hasPermission('mail.compose'))
+                @if (bouncer()->hasPermission('mail.compose') && feature_enabled('ub_crm_email_features'))
                     <x-admin::activities.actions.mail
                         :entity="$lead"
                         entity-control-name="lead_id"
@@ -122,11 +122,13 @@
                 :endpoint="route('admin.leads.activities.index', $lead->id)"
                 :email-detach-endpoint="route('admin.leads.emails.detach', $lead->id)"
                 :activeType="request()->query('from') === 'quotes' ? 'quotes' : 'overview'"
-                :types="[
+                :types="array_values(array_filter([
                     ['name' => 'file', 'label' => trans('admin::app.components.activities.index.files')],
-                    ['name' => 'email', 'label' => trans('admin::app.components.activities.index.emails')],
+                    feature_enabled('ub_crm_email_features')
+                        ? ['name' => 'email', 'label' => trans('admin::app.components.activities.index.emails')]
+                        : null,
                     ['name' => 'system', 'label' => trans('admin::app.components.activities.index.change-log')],
-                ]"
+                ]))"
                 :extra-types="[
                     ['name' => 'overview', 'label' => 'Overview'],
                     ['name' => 'products', 'label' => trans('admin::app.leads.view.tabs.products')],

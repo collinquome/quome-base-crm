@@ -46,21 +46,17 @@
                     {!! view_render_event('admin.contact.persons.view.title.after', ['person' => $person]) !!}
                 </div>
                 
-                <!-- Next Action Widget -->
-                <x-admin::next-action-widget
-                    entity-type="person"
-                    :entity-id="$person->id"
-                />
-
                 <!-- Activity Actions -->
                 <div class="flex flex-wrap gap-2">
                     {!! view_render_event('admin.contact.persons.view.actions.before', ['person' => $person]) !!}
 
-                    <!-- Mail Activity Action -->
-                    <x-admin::activities.actions.mail
-                        :entity="$person"
-                        entity-control-name="person_id"
-                    />
+                    @if (feature_enabled('ub_crm_email_features'))
+                        <!-- Mail Activity Action -->
+                        <x-admin::activities.actions.mail
+                            :entity="$person"
+                            entity-control-name="person_id"
+                        />
+                    @endif
 
                     <!-- File Activity Action -->
                     <x-admin::activities.actions.file
