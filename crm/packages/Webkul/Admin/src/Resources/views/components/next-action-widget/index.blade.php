@@ -15,10 +15,13 @@
         id="v-next-action-widget-template"
     >
         <div class="flex flex-col gap-3">
-            <!-- Current Next Action -->
+            <!-- Next Actions -->
             <div class="rounded-lg border border-gray-200 dark:border-gray-800" data-testid="next-action-section">
                 <div class="flex items-center justify-between border-b border-gray-200 px-4 py-2 dark:border-gray-800">
-                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Next Action</h4>
+                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Next Actions
+                        <span v-if="pendingActions.length > 0" class="ml-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400" v-text="pendingActions.length"></span>
+                    </h4>
                     <button
                         v-if="!showCreateForm"
                         type="button"
@@ -30,97 +33,102 @@
                     </button>
                 </div>
 
-                <!-- Current Action Card — View Mode -->
-                <div v-if="currentAction && !showCreateForm && !editing" class="p-4">
-                    <div class="flex items-start gap-3" data-testid="next-action-current">
-                        <div class="mt-1 flex h-3 w-3 flex-shrink-0 rounded-full" :class="urgencyDotClass"></div>
+                <!-- Pending Actions List -->
+                <div v-if="pendingActions.length > 0 && !showCreateForm" class="divide-y divide-gray-200 dark:divide-gray-800" data-testid="next-action-list">
+                    <div
+                        v-for="action in pendingActions"
+                        :key="action.id"
+                        class="p-4"
+                    >
+                        <!-- View mode -->
+                        <div v-if="editingId !== action.id" class="flex items-start gap-3" data-testid="next-action-current">
+                            <div class="mt-1 flex h-3 w-3 flex-shrink-0 rounded-full" :class="urgencyDotClassFor(action)"></div>
 
-                        <div class="min-w-0 flex-1 cursor-pointer" @click="startEditing" title="Click to edit">
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">
-                                    @{{ currentAction.description || currentAction.action_type }}
-                                </span>
-                                <span class="rounded-full px-2 py-0.5 text-xs font-medium" :class="urgencyLabelClass">
-                                    @{{ urgencyLabel }}
-                                </span>
+                            <div class="group min-w-0 flex-1 cursor-pointer" @click="startEditing(action)" title="Click to edit">
+                                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">
+                                        @{{ action.description || action.action_type }}
+                                    </span>
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" :class="urgencyLabelClassFor(action)">
+                                        @{{ urgencyLabelFor(action) }}
+                                    </span>
+                                </div>
+                                <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <span :class="actionTypeIcon(action.action_type)"></span>
+                                    <span v-text="action.action_type"></span>
+                                    <span v-if="action.due_date">&middot; @{{ formatDate(action.due_date) }}</span>
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5" :class="priorityBadgeClassFor(action)" v-text="action.priority"></span>
+                                    <span class="ml-1 text-blue-500 opacity-0 transition-opacity group-hover:opacity-100 dark:text-blue-400">
+                                        <span class="icon-edit text-xs"></span>
+                                    </span>
+                                </div>
                             </div>
-                            <div class="mt-1 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                                <span :class="actionTypeIcon(currentAction.action_type)"></span>
-                                <span v-text="currentAction.action_type"></span>
-                                <span v-if="currentAction.due_date">&middot; @{{ formatDate(currentAction.due_date) }}</span>
-                                <span class="rounded-full px-1.5 py-0.5" :class="priorityBadgeClass" v-text="currentAction.priority"></span>
-                                <span class="ml-1 text-blue-500 opacity-0 transition-opacity group-hover:opacity-100 dark:text-blue-400">
-                                    <span class="icon-edit text-xs"></span>
-                                </span>
-                            </div>
+
+                            <button
+                                type="button"
+                                class="flex-shrink-0 rounded-md border border-green-600 bg-green-600 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-green-700 hover:border-green-700 dark:bg-green-700 dark:border-green-700 dark:hover:bg-green-600"
+                                @click="completeAction(action)"
+                                data-testid="next-action-complete-btn"
+                            >
+                                Complete
+                            </button>
                         </div>
 
-                        <button
-                            type="button"
-                            class="flex-shrink-0 rounded-md border border-green-600 bg-green-600 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-green-700 hover:border-green-700 dark:bg-green-700 dark:border-green-700 dark:hover:bg-green-600"
-                            @click="completeAndPrompt"
-                            data-testid="next-action-complete-btn"
-                        >
-                            Complete
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Current Action Card — Edit Mode -->
-                <div v-if="currentAction && editing" class="p-4" data-testid="next-action-edit-form">
-                    <div class="flex flex-col gap-3">
-                        <div class="flex gap-2">
-                            <select
-                                v-model="editData.action_type"
-                                class="w-1/3 rounded-md border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                                data-testid="edit-action-type"
-                            >
-                                <option value="call">Call</option>
-                                <option value="email">Email</option>
-                                <option value="meeting">Meeting</option>
-                                <option value="task">Task</option>
-                                <option value="custom">Custom</option>
-                            </select>
-                            <select
-                                v-model="editData.priority"
-                                class="w-1/3 rounded-md border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                                data-testid="edit-action-priority"
-                            >
-                                <option value="urgent">Urgent</option>
-                                <option value="high">High</option>
-                                <option value="normal">Normal</option>
-                                <option value="low">Low</option>
-                            </select>
+                        <!-- Edit mode (inline for this row only) -->
+                        <div v-else class="flex flex-col gap-3" data-testid="next-action-edit-form">
+                            <div class="flex gap-2">
+                                <select
+                                    v-model="editData.action_type"
+                                    class="w-1/3 rounded-md border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                                    data-testid="edit-action-type"
+                                >
+                                    <option value="call">Call</option>
+                                    <option value="email">Email</option>
+                                    <option value="meeting">Meeting</option>
+                                    <option value="task">Task</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                                <select
+                                    v-model="editData.priority"
+                                    class="w-1/3 rounded-md border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                                    data-testid="edit-action-priority"
+                                >
+                                    <option value="urgent">Urgent</option>
+                                    <option value="high">High</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="low">Low</option>
+                                </select>
+                                <input
+                                    type="date"
+                                    v-model="editData.due_date"
+                                    class="w-1/3 rounded-md border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                                    data-testid="edit-action-due-date"
+                                />
+                            </div>
                             <input
-                                type="date"
-                                v-model="editData.due_date"
-                                class="w-1/3 rounded-md border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                                data-testid="edit-action-due-date"
+                                type="text"
+                                v-model="editData.description"
+                                class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                                data-testid="edit-action-description"
                             />
-                        </div>
-                        <input
-                            type="text"
-                            v-model="editData.description"
-                            class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                            data-testid="edit-action-description"
-                        />
-                        <div class="flex justify-end gap-2">
-                            <button
-                                type="button"
-                                class="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
-                                @click="cancelEditing"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                class="rounded-md border border-blue-600 bg-blue-600 px-3 py-1.5 text-xs font-medium text-black hover:bg-blue-700 cursor-pointer"
-                                :disabled="updating"
-                                @click="saveEdit"
-                                data-testid="edit-action-save-btn"
-                            >
-                                @{{ updating ? 'Saving...' : 'Save Changes' }}
-                            </button>
+                            <div class="flex justify-end gap-2">
+                                <button
+                                    type="button"
+                                    class="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                                    @click="cancelEditing"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    class="rounded-md border border-blue-600 bg-blue-600 px-3 py-1.5 text-xs font-medium hover:bg-blue-700 cursor-pointer"
+                                    :disabled="updating"
+                                    @click="saveEdit"
+                                    data-testid="edit-action-save-btn"
+                                >
+                                    @{{ updating ? 'Saving...' : 'Save Changes' }}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -212,10 +220,10 @@
                 </div>
 
                 <!-- Empty State -->
-                <div v-if="!currentAction && !showCreateForm && loaded" class="p-4">
+                <div v-if="pendingActions.length === 0 && !showCreateForm && loaded" class="p-4">
                     <div class="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500" data-testid="next-action-empty">
                         <span class="icon-activity text-base"></span>
-                        No next action set
+                        No next actions set
                         <button
                             type="button"
                             class="ml-auto text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
@@ -234,22 +242,38 @@
                     <span class="text-xs text-gray-400 dark:text-gray-500">@{{ completedActions.length }} completed</span>
                 </div>
 
-                <div v-if="completedActions.length > 0" class="max-h-48 overflow-y-auto p-3" data-testid="action-history-list">
+                <div v-if="completedActions.length > 0" class="max-h-72 overflow-y-auto p-3" data-testid="action-history-list">
                     <div class="relative ml-3 border-l-2 border-gray-200 pl-4 dark:border-gray-700">
                         <div
                             v-for="action in completedActions"
                             :key="action.id"
-                            class="relative mb-3 last:mb-0"
+                            class="relative mb-4 last:mb-0"
                         >
                             <!-- Timeline Dot -->
                             <div class="absolute -left-[1.375rem] top-1 h-2.5 w-2.5 rounded-full bg-green-500"></div>
-                            <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <span class="font-medium">@{{ action.description || action.action_type }}</span>
-                            </div>
-                            <div class="text-xs text-gray-400 dark:text-gray-500">
-                                <span :class="actionTypeIcon(action.action_type)"></span>
-                                @{{ action.action_type }}
-                                <span v-if="action.completed_at">&middot; Completed @{{ formatDate(action.completed_at) }}</span>
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                        <span class="font-medium">@{{ action.description || action.action_type }}</span>
+                                        <span class="rounded-full px-1.5 py-0.5 text-xs font-medium" :class="urgencyLabelClassFor(action)" v-text="urgencyLabelFor(action)"></span>
+                                        <span class="rounded-full px-1.5 py-0.5 text-xs font-medium" :class="priorityBadgeClassFor(action)" v-text="action.priority"></span>
+                                    </div>
+                                    <div class="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-gray-500 dark:text-gray-400">
+                                        <span :class="actionTypeIcon(action.action_type)"></span>
+                                        <span v-text="action.action_type"></span>
+                                        <span v-if="action.due_date">&middot; Due @{{ formatDate(action.due_date) }}</span>
+                                        <span v-if="action.completed_at">&middot; Completed @{{ formatDate(action.completed_at) }}</span>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    class="flex-shrink-0 rounded-md border border-gray-300 px-2 py-0.5 text-xs font-medium text-gray-600 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-blue-900/20"
+                                    @click="reopenAction(action)"
+                                    title="Re-open this action"
+                                    data-testid="reopen-action-btn"
+                                >
+                                    Reopen
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -273,15 +297,14 @@
 
             data() {
                 return {
-                    currentAction: null,
+                    pendingActions: [],
                     completedActions: [],
                     loaded: false,
                     showCreateForm: false,
                     saving: false,
-                    editing: false,
+                    editingId: null,
                     updating: false,
                     editData: {},
-                    urgency: 'none',
                     newAction: {
                         action_type: 'call',
                         priority: 'normal',
@@ -304,34 +327,6 @@
                         { label: 'Next Week', value: fmt(nextMonday) },
                     ];
                 },
-
-                urgencyLabel() {
-                    return { overdue: 'Overdue', today: 'Due Today', this_week: 'This Week', upcoming: 'Upcoming', none: 'No Date' }[this.urgency] || '';
-                },
-
-                urgencyDotClass() {
-                    return { overdue: 'bg-red-500', today: 'bg-orange-500', this_week: 'bg-yellow-500', upcoming: 'bg-green-500', none: 'bg-gray-400' }[this.urgency] || 'bg-gray-400';
-                },
-
-                urgencyLabelClass() {
-                    return {
-                        overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-                        today: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-                        this_week: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-                        upcoming: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-                        none: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
-                    }[this.urgency] || 'bg-gray-100 text-gray-500';
-                },
-
-                priorityBadgeClass() {
-                    if (!this.currentAction) return '';
-                    return {
-                        urgent: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-                        high: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-                        normal: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-                        low: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
-                    }[this.currentAction.priority] || 'bg-gray-100 text-gray-600';
-                },
             },
 
             mounted() {
@@ -348,33 +343,46 @@
                     });
                 };
                 this.$emitter.on('next-action:open-create', this._onOpenCreate);
+
+                // Listen for CRUD events from any other widget instance for the same entity.
+                this._onChanged = (payload) => {
+                    if (! payload) return;
+                    if (payload.entityType !== this.entityType) return;
+                    if (Number(payload.entityId) !== Number(this.entityId)) return;
+                    this.fetchActions();
+                };
+                this.$emitter.on('next-action:changed', this._onChanged);
             },
 
             beforeUnmount() {
                 if (this._onOpenCreate) {
                     this.$emitter.off('next-action:open-create', this._onOpenCreate);
                 }
+                if (this._onChanged) {
+                    this.$emitter.off('next-action:changed', this._onChanged);
+                }
             },
 
             methods: {
+                broadcastChanged() {
+                    this.$emitter.emit('next-action:changed', {
+                        entityType: this.entityType,
+                        entityId: this.entityId,
+                    });
+                },
+
                 async fetchActions() {
                     try {
-                        // Fetch current pending action
+                        // Fetch ALL pending actions for this entity, sorted by priority + due date.
                         const pendingRes = await this.$axios.get('/admin/action-stream/list', {
                             params: {
                                 actionable_type: this.entityType,
                                 actionable_id: this.entityId,
                                 status: 'pending',
-                                per_page: 1,
+                                per_page: 50,
                             },
                         });
-                        const pending = pendingRes.data?.data || [];
-                        if (pending.length > 0) {
-                            this.currentAction = pending[0];
-                            this.urgency = this.calculateUrgency(this.currentAction.due_date);
-                        } else {
-                            this.currentAction = null;
-                        }
+                        this.pendingActions = pendingRes.data?.data || [];
 
                         // Fetch completed actions for history
                         const completedRes = await this.$axios.get('/admin/action-stream/list', {
@@ -382,7 +390,7 @@
                                 actionable_type: this.entityType,
                                 actionable_id: this.entityId,
                                 status: 'completed',
-                                per_page: 10,
+                                per_page: 20,
                             },
                         });
                         this.completedActions = completedRes.data?.data || [];
@@ -393,19 +401,37 @@
                     }
                 },
 
-                async completeAndPrompt() {
-                    if (!this.currentAction) return;
+                async completeAction(action) {
+                    if (! action) return;
                     try {
-                        await this.$axios.post(`/admin/action-stream/${this.currentAction.id}/complete`);
-                        this.currentAction = null;
-                        this.showCreateForm = true;
+                        await this.$axios.post(`/admin/action-stream/${action.id}/complete`);
                         await this.fetchActions();
+                        this.broadcastChanged();
                     } catch (error) {
                         const msg = error.response?.data?.message || 'Failed to complete action.';
                         if (typeof this.$emitter !== 'undefined') {
                             this.$emitter.emit('add-flash', { type: 'error', message: msg });
                         }
                         console.error('Failed to complete action:', error);
+                    }
+                },
+
+                async reopenAction(action) {
+                    if (! action) return;
+                    try {
+                        // The action-stream update endpoint accepts status changes via a PUT to the main update
+                        // route, but our controller's update() does not flip status. We PUT to the /complete toggle
+                        // would re-complete; use the update route with status via the dedicated reopen endpoint
+                        // if available — fall back to a simple PUT that sets status = 'pending'.
+                        await this.$axios.put(`/admin/action-stream/${action.id}`, { status: 'pending' });
+                        await this.fetchActions();
+                        this.broadcastChanged();
+                    } catch (error) {
+                        const msg = error.response?.data?.message || 'Failed to reopen action.';
+                        if (typeof this.$emitter !== 'undefined') {
+                            this.$emitter.emit('add-flash', { type: 'error', message: msg });
+                        }
+                        console.error('Failed to reopen action:', error);
                     }
                 },
 
@@ -429,7 +455,8 @@
                         await this.$axios.post('/admin/action-stream', payload);
                         this.resetForm();
                         this.showCreateForm = false;
-                        this.fetchActions();
+                        await this.fetchActions();
+                        this.broadcastChanged();
                     } catch (error) {
                         const msg = error.response?.data?.message || 'Failed to save action. Please try again.';
                         if (typeof this.$emitter !== 'undefined') {
@@ -446,23 +473,24 @@
                     this.resetForm();
                 },
 
-                startEditing() {
+                startEditing(action) {
+                    if (! action) return;
+                    this.editingId = action.id;
                     this.editData = {
-                        action_type: this.currentAction.action_type,
-                        priority: this.currentAction.priority,
-                        due_date: this.currentAction.due_date ? this.currentAction.due_date.split('T')[0] : '',
-                        description: this.currentAction.description || '',
+                        action_type: action.action_type,
+                        priority: action.priority,
+                        due_date: action.due_date ? String(action.due_date).split('T')[0] : '',
+                        description: action.description || '',
                     };
-                    this.editing = true;
                 },
 
                 cancelEditing() {
-                    this.editing = false;
+                    this.editingId = null;
                     this.editData = {};
                 },
 
                 async saveEdit() {
-                    if (this.updating) return;
+                    if (this.updating || ! this.editingId) return;
                     this.updating = true;
                     try {
                         const payload = {
@@ -470,16 +498,13 @@
                             priority: this.editData.priority,
                             description: this.editData.description,
                         };
-                        if (this.editData.due_date) {
-                            payload.due_date = this.editData.due_date;
-                        } else {
-                            payload.due_date = null;
-                        }
+                        payload.due_date = this.editData.due_date || null;
 
-                        await this.$axios.put(`/admin/action-stream/${this.currentAction.id}`, payload);
-                        this.editing = false;
+                        await this.$axios.put(`/admin/action-stream/${this.editingId}`, payload);
+                        this.editingId = null;
                         this.editData = {};
                         await this.fetchActions();
+                        this.broadcastChanged();
                     } catch (error) {
                         const msg = error.response?.data?.message || 'Failed to update action.';
                         if (typeof this.$emitter !== 'undefined') {
@@ -511,6 +536,33 @@
                     if (diffDays === 0) return 'today';
                     if (diffDays <= 7) return 'this_week';
                     return 'upcoming';
+                },
+
+                urgencyLabelFor(action) {
+                    return { overdue: 'Overdue', today: 'Due Today', this_week: 'This Week', upcoming: 'Upcoming', none: 'No Date' }[this.calculateUrgency(action.due_date)] || '';
+                },
+
+                urgencyDotClassFor(action) {
+                    return { overdue: 'bg-red-500', today: 'bg-orange-500', this_week: 'bg-yellow-500', upcoming: 'bg-green-500', none: 'bg-gray-400' }[this.calculateUrgency(action.due_date)] || 'bg-gray-400';
+                },
+
+                urgencyLabelClassFor(action) {
+                    return {
+                        overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                        today: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+                        this_week: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                        upcoming: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                        none: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
+                    }[this.calculateUrgency(action.due_date)] || 'bg-gray-100 text-gray-500';
+                },
+
+                priorityBadgeClassFor(action) {
+                    return {
+                        urgent: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                        high: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+                        normal: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                        low: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+                    }[action.priority] || 'bg-gray-100 text-gray-600';
                 },
 
                 formatDate(dateStr) {

@@ -64,6 +64,19 @@
                         <option value="low">Low</option>
                     </select>
 
+                    <!-- Status Filter -->
+                    <select
+                        v-model="filters.status"
+                        @change="fetchActions"
+                        class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                        data-testid="action-stream-status-filter"
+                    >
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="snoozed">Snoozed</option>
+                        <option value="">All Statuses</option>
+                    </select>
+
                     <!-- Sort -->
                     <select
                         v-model="sortBy"
@@ -131,13 +144,13 @@
                                 <div class="flex items-center gap-2">
                                     <span class="action-title font-medium text-gray-900 dark:text-white" v-text="action.description || action.action_type"></span>
                                     <span
-                                        class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                        class="rounded-full px-2.5 py-0.5 text-xs font-medium"
                                         :class="urgencyLabelClass(action.due_date)"
                                         v-text="urgencyLabel(action.due_date)"
                                         data-testid="action-urgency-badge"
                                     ></span>
                                     <span
-                                        class="rounded-full px-2 py-0.5 text-xs font-medium"
+                                        class="rounded-full px-2.5 py-0.5 text-xs font-medium"
                                         :class="priorityBadgeClass(action.priority)"
                                         v-text="action.priority"
                                     ></span>
@@ -158,22 +171,35 @@
 
                         <!-- Actions -->
                         <div class="flex items-center gap-2">
-                            <button
-                                type="button"
-                                class="rounded-md p-1.5 text-green-600 transition-all hover:bg-green-50 dark:hover:bg-green-900/20"
-                                @click="completeAction(action.id)"
-                                title="Mark Complete"
-                            >
-                                <span class="icon-checkbox-outline text-xl"></span>
-                            </button>
-                            <button
-                                type="button"
-                                class="rounded-md p-1.5 text-yellow-600 transition-all hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
-                                @click="snoozeAction(action.id)"
-                                title="Snooze"
-                            >
-                                <span class="icon-clock text-xl"></span>
-                            </button>
+                            <template v-if="action.status === 'completed'">
+                                <button
+                                    type="button"
+                                    class="rounded-md border border-gray-300 px-2.5 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-blue-900/20"
+                                    @click="reopenAction(action.id)"
+                                    title="Re-open this action"
+                                    data-testid="action-stream-reopen-btn"
+                                >
+                                    Reopen
+                                </button>
+                            </template>
+                            <template v-else>
+                                <button
+                                    type="button"
+                                    class="rounded-md p-1.5 text-green-600 transition-all hover:bg-green-50 dark:hover:bg-green-900/20"
+                                    @click="completeAction(action.id)"
+                                    title="Mark Complete"
+                                >
+                                    <span class="icon-checkbox-outline text-xl"></span>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="rounded-md p-1.5 text-yellow-600 transition-all hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                                    @click="snoozeAction(action.id)"
+                                    title="Snooze"
+                                >
+                                    <span class="icon-clock text-xl"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -215,6 +241,7 @@
                         filters: {
                             action_type: '',
                             priority: '',
+                            status: 'pending',
                         },
                         sortBy: 'due_date',
                         pagination: {
@@ -238,6 +265,7 @@
                             const params = new URLSearchParams();
                             if (this.filters.action_type) params.set('action_type', this.filters.action_type);
                             if (this.filters.priority) params.set('priority', this.filters.priority);
+                            if (this.filters.status) params.set('status', this.filters.status);
                             params.set('page', this.pagination.currentPage);
                             params.set('per_page', 15);
 
@@ -255,6 +283,16 @@
                             this.actions = [];
                         } finally {
                             this.isLoading = false;
+                        }
+                    },
+
+                    async reopenAction(id) {
+                        try {
+                            await this.$axios.put(`/admin/action-stream/${id}`, { status: 'pending' });
+                            await this.fetchActions();
+                            this.fetchOverdueCount();
+                        } catch (error) {
+                            console.error('Failed to reopen action:', error);
                         }
                     },
 

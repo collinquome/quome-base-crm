@@ -27,7 +27,7 @@ class ActionStreamController extends Controller
      */
     public function stream(Request $request): JsonResponse
     {
-        $filters = $request->only(['action_type', 'priority', 'due_from', 'due_to']);
+        $filters = $request->only(['action_type', 'priority', 'due_from', 'due_to', 'status']);
 
         $query = $this->nextActionRepository->getPrioritizedActions(
             auth()->guard('user')->id(),
@@ -143,15 +143,21 @@ class ActionStreamController extends Controller
             'due_date'    => 'sometimes|nullable|date',
             'due_time'    => 'sometimes|nullable|date_format:H:i',
             'priority'    => 'sometimes|string|in:urgent,high,normal,low',
+            'status'      => 'sometimes|string|in:pending,completed,snoozed',
         ]);
 
-        $data = $request->only(['action_type', 'description', 'due_date', 'due_time', 'priority']);
+        $data = $request->only(['action_type', 'description', 'due_date', 'due_time', 'priority', 'status']);
 
         if (array_key_exists('due_date', $data) && $data['due_date'] === '') {
             $data['due_date'] = null;
         }
         if (array_key_exists('due_time', $data) && $data['due_time'] === '') {
             $data['due_time'] = null;
+        }
+
+        // Reopening: when status flips back to pending, clear completed_at.
+        if (array_key_exists('status', $data) && $data['status'] === 'pending') {
+            $data['completed_at'] = null;
         }
 
         $action = $this->nextActionRepository->findOrFail($id);

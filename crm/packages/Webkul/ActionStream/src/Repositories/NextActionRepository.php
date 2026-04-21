@@ -16,8 +16,15 @@ class NextActionRepository extends BaseRepository
     public function getPrioritizedActions(int $userId, array $filters = [])
     {
         $query = $this->model->where('user_id', $userId)
-            ->where('status', 'pending')
             ->with(['actionable']);
+
+        if (array_key_exists('status', $filters) && $filters['status'] === '') {
+            // Explicit "all statuses" — no status filter applied.
+        } elseif (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        } else {
+            $query->where('status', 'pending');
+        }
 
         if (! empty($filters['action_type'])) {
             $query->where('action_type', $filters['action_type']);
