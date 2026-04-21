@@ -25,6 +25,7 @@
                 placeholder="@lang('admin::app.leads.index.kanban.toolbar.search.title')"
                 autocomplete="off"
                 :value="getSearchedValues()"
+                @input="debouncedSearch"
                 @keyup.enter="search"
             >
         </div>
@@ -43,6 +44,7 @@
                     filters: {
                         columns: [],
                     },
+                    searchDebounceTimer: null,
                 };
             },
 
@@ -50,7 +52,31 @@
                 this.filters.columns = this.applied.filters.columns.filter((column) => column.index === 'all');
             },
 
+            beforeUnmount() {
+                if (this.searchDebounceTimer) {
+                    clearTimeout(this.searchDebounceTimer);
+                }
+            },
+
             methods: {
+                /**
+                 * Debounce input changes so typing triggers a search after a short pause.
+                 *
+                 * @param {Event} $event
+                 * @returns {void}
+                 */
+                debouncedSearch($event) {
+                    if (this.searchDebounceTimer) {
+                        clearTimeout(this.searchDebounceTimer);
+                    }
+
+                    const target = $event.target;
+
+                    this.searchDebounceTimer = setTimeout(() => {
+                        this.search({ target });
+                    }, 300);
+                },
+
                 /**
                  * Perform a search operation based on the input value.
                  *
