@@ -16,7 +16,15 @@ class NextActionRepository extends BaseRepository
     public function getPrioritizedActions(int $userId, array $filters = [])
     {
         $query = $this->model->where('user_id', $userId)
-            ->with(['actionable']);
+            ->with([
+                'actionable' => function ($morph) {
+                    // Eager-load the primary person on lead actionables so the
+                    // action stream row can show the contact inline.
+                    $morph->morphWith([
+                        \Webkul\Lead\Models\Lead::class => ['person'],
+                    ]);
+                },
+            ]);
 
         if (array_key_exists('status', $filters) && $filters['status'] === '') {
             // Explicit "all statuses" — no status filter applied.

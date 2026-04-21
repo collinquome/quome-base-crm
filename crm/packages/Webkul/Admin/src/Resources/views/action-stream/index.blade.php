@@ -155,10 +155,14 @@
                                         v-text="action.priority"
                                     ></span>
                                 </div>
-                                <div class="mt-0.5 flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                                <div class="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
                                     <span v-if="action.actionable">
                                         <span class="icon-contact text-xs"></span>
-                                        @{{ action.actionable?.name || action.actionable?.title || action.actionable_type + ' #' + action.actionable_id }}
+                                        @{{ action.actionable?.title || action.actionable?.name || action.actionable_type + ' #' + action.actionable_id }}
+                                    </span>
+                                    <!-- Show the linked person inline for leads so reps see who to contact at a glance. -->
+                                    <span v-if="action.actionable?.person?.name" class="text-gray-600 dark:text-gray-400" data-testid="action-stream-person">
+                                        &middot; @{{ action.actionable.person.name }}
                                     </span>
                                     <span v-if="action.due_date">
                                         <span class="icon-calendar text-xs"></span>
