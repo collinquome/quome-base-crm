@@ -32,6 +32,11 @@
         {{-- content="{{ core()->getCurrentCurrencyCode() }}" --}}
     >
 
+    <!-- PostHog (browser analytics) — anonymous pages still benefit from pageview tracking. -->
+    <meta name="posthog-token" content="{{ config('posthog.api_key') }}">
+    <meta name="posthog-host" content="{{ config('posthog.host', 'https://us.i.posthog.com') }}">
+    <meta name="posthog-disabled" content="{{ config('posthog.disabled') ? 'true' : 'false' }}">
+
     @stack('meta')
 
     {{

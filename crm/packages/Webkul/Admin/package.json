@@ -27,6 +27,7 @@
         "laravel-echo": "^2.3.0",
         "mitt": "^3.0.1",
         "playwright": "^1.48.1",
+        "posthog-js": "^1.369.5",
         "pusher-js": "^8.4.0",
         "readline-sync": "^1.4.10",
         "vee-validate": "^4.9.1",

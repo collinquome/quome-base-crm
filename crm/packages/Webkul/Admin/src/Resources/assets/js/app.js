@@ -108,6 +108,7 @@ import CreateElement from "./plugins/createElement";
 import Draggable from "./plugins/draggable";
 import VueCal from "./plugins/vue-cal";
 import EchoPlugin from "./plugins/echo";
+import PostHogPlugin from "./plugins/posthog";
 
 [
     Admin,
@@ -119,6 +120,7 @@ import EchoPlugin from "./plugins/echo";
     VeeValidate,
     VueCal,
     EchoPlugin,
+    PostHogPlugin,
 ].forEach((plugin) => app.use(plugin));
 
 /**

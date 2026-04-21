@@ -41,6 +41,19 @@
         "
     >
 
+    <!-- PostHog (browser analytics). Plugin reads these and boots only when token is present + not disabled. -->
+    @php
+        $posthogUser = auth()->guard('user')->user();
+    @endphp
+    <meta name="posthog-token" content="{{ config('posthog.api_key') }}">
+    <meta name="posthog-host" content="{{ config('posthog.host', 'https://us.i.posthog.com') }}">
+    <meta name="posthog-disabled" content="{{ config('posthog.disabled') ? 'true' : 'false' }}">
+    @if ($posthogUser)
+        <meta name="posthog-user-id" content="{{ $posthogUser->id }}">
+        <meta name="posthog-user-email" content="{{ $posthogUser->email }}">
+        <meta name="posthog-user-name" content="{{ $posthogUser->name }}">
+    @endif
+
     @stack('meta')
 
     {{
