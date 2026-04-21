@@ -2,6 +2,7 @@
 
 namespace Webkul\Admin\Http\Controllers\Lead;
 
+use App\Services\PostHogService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -161,6 +162,11 @@ class LeadController extends Controller
 
         $data['status'] = 1;
 
+        // Sync description to notes — they are the same field for the user
+        if (! empty($data['description'])) {
+            $data['notes'] = $data['description'];
+        }
+
         if (empty($data['user_id'])) {
             $data['user_id'] = auth()->guard('user')->id();
         }
@@ -188,6 +194,15 @@ class LeadController extends Controller
         }
 
         $lead = $this->leadRepository->create($data);
+
+        PostHogService::capture(PostHogService::distinctId(), 'lead_created', [
+            'lead_id'       => $lead->id,
+            'lead_title'    => $lead->title,
+            'pipeline_id'   => $lead->lead_pipeline_id,
+            'stage_id'      => $lead->lead_pipeline_stage_id,
+            'stage_name'    => optional($lead->stage)->name,
+            'lead_value'    => $lead->lead_value,
+        ]);
 
         if (request()->ajax()) {
             return response()->json([
@@ -302,6 +317,26 @@ class LeadController extends Controller
     }
 
     /**
+     * Update the lead notes scratchpad.
+     */
+    public function updateNotes(int $id): JsonResponse
+    {
+        $lead = $this->leadRepository->findOrFail($id);
+
+        $notes = request()->input('notes', '');
+
+        $lead->update([
+            'notes'       => $notes,
+            'description' => $notes,
+        ]);
+
+        return response()->json([
+            'message' => trans('admin::app.leads.update-success'),
+            'notes'   => $lead->notes,
+        ]);
+    }
+
+    /**
      * Update the lead stage.
      */
     public function updateStage(int $id)
@@ -331,6 +366,14 @@ class LeadController extends Controller
         $lead = $this->leadRepository->update($payload, $id, ['lead_pipeline_stage_id']);
 
         Event::dispatch('lead.update.after', $lead);
+
+        PostHogService::capture(PostHogService::distinctId(), 'lead_stage_updated', [
+            'lead_id'    => $lead->id,
+            'lead_title' => $lead->title,
+            'stage_id'   => $lead->lead_pipeline_stage_id,
+            'stage_name' => optional($lead->stage)->name,
+            'stage_code' => optional($lead->stage)->code,
+        ]);
 
         return response()->json([
             'message' => trans('admin::app.leads.update-success'),
@@ -368,6 +411,10 @@ class LeadController extends Controller
             $this->leadRepository->delete($id);
 
             Event::dispatch('lead.delete.after', $id);
+
+            PostHogService::capture(PostHogService::distinctId(), 'lead_deleted', [
+                'lead_id' => $id,
+            ]);
 
             return response()->json([
                 'message' => trans('admin::app.leads.destroy-success'),
@@ -666,9 +713,16 @@ class LeadController extends Controller
             return response()->json(MagicAI::errorHandler(trans('admin::app.leads.no-valid-files')), 400);
         }
 
+        $createdLeads = $this->createLeads($leadData);
+
+        PostHogService::capture(PostHogService::distinctId(), 'lead_created_via_ai', [
+            'leads_created' => count($createdLeads),
+            'files_count'   => count(request()->file('files', [])),
+        ]);
+
         return response()->json([
             'message' => trans('admin::app.leads.create-success'),
-            'leads'   => $this->createLeads($leadData),
+            'leads'   => $createdLeads,
         ]);
     }
 

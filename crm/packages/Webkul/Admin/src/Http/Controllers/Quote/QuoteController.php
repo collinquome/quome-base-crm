@@ -2,6 +2,7 @@
 
 namespace Webkul\Admin\Http\Controllers\Quote;
 
+use App\Services\PostHogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -75,6 +76,13 @@ class QuoteController extends Controller
         }
 
         Event::dispatch('quote.create.after', $quote);
+
+        PostHogService::capture(PostHogService::distinctId(), 'quote_created', [
+            'quote_id'      => $quote->id,
+            'quote_subject' => $quote->subject,
+            'lead_id'       => $leadId ?? null,
+            'grand_total'   => $quote->grand_total,
+        ]);
 
         session()->flash('success', trans('admin::app.quotes.index.create-success'));
 
@@ -189,6 +197,11 @@ class QuoteController extends Controller
     public function print($id): Response|StreamedResponse
     {
         $quote = $this->quoteRepository->findOrFail($id);
+
+        PostHogService::capture(PostHogService::distinctId(), 'quote_printed', [
+            'quote_id'      => $quote->id,
+            'quote_subject' => $quote->subject,
+        ]);
 
         return $this->downloadPDF(
             view('admin::quotes.pdf', compact('quote'))->render(),

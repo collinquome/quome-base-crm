@@ -2,6 +2,7 @@
 
 namespace Webkul\Admin\Http\Controllers\Contact\Persons;
 
+use App\Services\PostHogService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -58,6 +59,11 @@ class PersonController extends Controller
         $person = $this->personRepository->create($request->all());
 
         Event::dispatch('contacts.person.create.after', $person);
+
+        PostHogService::capture(PostHogService::distinctId(), 'contact_created', [
+            'contact_id'   => $person->id,
+            'contact_name' => $person->name,
+        ]);
 
         if (request()->ajax()) {
             return response()->json([

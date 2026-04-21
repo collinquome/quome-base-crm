@@ -2,6 +2,7 @@
 
 namespace Webkul\Admin\Http\Controllers\Activity;
 
+use App\Services\PostHogService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Event;
@@ -108,6 +109,12 @@ class ActivityController extends Controller
         ]));
 
         Event::dispatch('activity.create.after', $activity);
+
+        PostHogService::capture(PostHogService::distinctId(), 'activity_created', [
+            'activity_id'   => $activity->id,
+            'activity_type' => $activity->type,
+            'is_done'       => (bool) $activity->is_done,
+        ]);
 
         if (request()->ajax()) {
             return response()->json([

@@ -2,6 +2,7 @@
 
 namespace Webkul\Admin\Http\Controllers\Products;
 
+use App\Services\PostHogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Event;
@@ -58,6 +59,12 @@ class ProductController extends Controller
         $product = $this->productRepository->create($request->all());
 
         Event::dispatch('product.create.after', $product);
+
+        PostHogService::capture(PostHogService::distinctId(), 'product_created', [
+            'product_id'   => $product->id,
+            'product_name' => $product->name,
+            'product_sku'  => $product->sku,
+        ]);
 
         session()->flash('success', trans('admin::app.products.index.create-success'));
 

@@ -2,6 +2,7 @@
 
 namespace Webkul\Admin\Http\Controllers\User;
 
+use App\Services\PostHogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -41,6 +42,12 @@ class SessionController extends Controller
         ]);
 
         if (! auth()->guard('user')->attempt(request(['email', 'password']), request('remember'))) {
+            PostHogService::capture(
+                PostHogService::distinctId(),
+                'user_login_failed',
+                ['email' => request('email')]
+            );
+
             session()->flash('error', trans('admin::app.users.login-error'));
 
             return redirect()->back();
@@ -70,6 +77,18 @@ class SessionController extends Controller
             return redirect()->to($availableNextMenu->getUrl());
         }
 
+        $user = auth()->guard('user')->user();
+
+        PostHogService::identify('user_' . $user->id, [
+            'email' => $user->email,
+            'name'  => $user->name,
+        ]);
+
+        PostHogService::capture('user_' . $user->id, 'user_logged_in', [
+            'email'      => $user->email,
+            'login_type' => 'password',
+        ]);
+
         $hasAccessToIntendedUrl = $this->canAccessIntendedUrl($menus, redirect()->getIntendedUrl());
 
         if ($hasAccessToIntendedUrl) {
@@ -84,6 +103,14 @@ class SessionController extends Controller
      */
     public function destroy(): RedirectResponse
     {
+        $user = auth()->guard('user')->user();
+
+        if ($user) {
+            PostHogService::capture('user_' . $user->id, 'user_logged_out', [
+                'email' => $user->email,
+            ]);
+        }
+
         auth()->guard('user')->logout();
 
         return redirect()->route('admin.session.create');
