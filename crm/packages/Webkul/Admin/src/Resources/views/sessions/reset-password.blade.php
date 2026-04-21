@@ -50,21 +50,33 @@
                     />
 
                     <div class="border-y p-4 dark:border-gray-800">
-                        <!-- Email -->
+                        <!-- Email (auto-filled from the invite link; kept read-only so it stays tied to the token) -->
                         <x-admin::form.control-group>
                             <x-admin::form.control-group.label class="required">
                                 @lang('admin::app.users.reset-password.email')
                             </x-admin::form.control-group.label>
 
-                            <x-admin::form.control-group.control
-                                type="email"
-                                class="w-[254px] max-w-full"
-                                id="email"
-                                name="email"
-                                rules="required|email"
-                                :label="trans('admin::app.users.reset-password.email')"
-                                :placeholder="trans('admin::app.users.reset-password.email')"
-                            />
+                            @if (! empty($email))
+                                <input
+                                    type="email"
+                                    class="w-[254px] max-w-full cursor-not-allowed rounded border border-gray-200 bg-gray-50 p-2 text-gray-700 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                                    id="email"
+                                    name="email"
+                                    readonly
+                                    value="{{ $email }}"
+                                    data-testid="reset-password-email"
+                                />
+                            @else
+                                <x-admin::form.control-group.control
+                                    type="email"
+                                    class="w-[254px] max-w-full"
+                                    id="email"
+                                    name="email"
+                                    rules="required|email"
+                                    :label="trans('admin::app.users.reset-password.email')"
+                                    :placeholder="trans('admin::app.users.reset-password.email')"
+                                />
+                            @endif
 
                             <x-admin::form.control-group.error control-name="email" />
                         </x-admin::form.control-group>
