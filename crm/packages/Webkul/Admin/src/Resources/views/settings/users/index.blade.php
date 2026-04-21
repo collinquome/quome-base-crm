@@ -369,11 +369,10 @@
                                         name="view_permission"
                                         rules="required"
                                         v-model="user.view_permission"
-                                        value="global"
+                                        value="individual"
                                         :label="trans('admin::app.settings.users.index.create.view-permission')"
                                     >
-                                        <!-- Default Option -->
-                                        <option  value="global" selected>
+                                        <option value="global">
                                             @lang('admin::app.settings.users.index.create.global')
                                         </option>
 
@@ -381,7 +380,8 @@
                                             @lang('admin::app.settings.users.index.create.group')
                                         </option>
 
-                                        <option value="individual">
+                                        <!-- Default Option -->
+                                        <option value="individual" selected>
                                             @lang('admin::app.settings.users.index.create.individual')
                                         </option>
                                     </x-admin::form.control-group.control>
@@ -491,7 +491,7 @@
                         groups:  @json($groups),
 
                         user: {
-                            view_permission: 'global',
+                            view_permission: 'individual',
                         },
                     };
                 },
@@ -538,6 +538,7 @@
                     openModal() {
                         this.user = {
                             groups: [],
+                            view_permission: 'individual',
                         };
 
                         this.$refs.userUpdateAndCreateModal.toggle();
