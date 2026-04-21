@@ -88,27 +88,46 @@
         <x-admin::table.thead.tr>
             <!-- Product Name -->
             <x-admin::table.td>
-                <x-admin::form.control-group class="!mb-0">
-                    <x-admin::lookup
-                        ::src="src"
-                        ::name="`${inputName}[name]`"
-                        ::params="params"
-                        :placeholder="trans('admin::app.leads.common.products.product-name')"
-                        @on-selected="(product) => addProduct(product)"
-                        ::value="{ id: product.product_id, name: product.name }"
-                    />
+                <div class="flex items-start gap-2">
+                    <div class="flex-1">
+                        <x-admin::form.control-group class="!mb-0">
+                            <x-admin::lookup
+                                ::src="src"
+                                ::name="`${inputName}[name]`"
+                                ::params="params"
+                                :placeholder="trans('admin::app.leads.common.products.product-name')"
+                                @on-selected="(product) => addProduct(product)"
+                                ::value="{ id: product.product_id, name: product.name }"
+                            />
 
-                    <x-admin::form.control-group.control
-                        type="hidden"
-                        ::name="`${inputName}[product_id]`"
-                        v-model="product.product_id"
-                        rules="required"
-                        :label="trans('admin::app.leads.common.products.product-name')"
-                        :placeholder="trans('admin::app.leads.common.products.product-name')"
-                    />
+                            <x-admin::form.control-group.control
+                                type="hidden"
+                                ::name="`${inputName}[product_id]`"
+                                v-model="product.product_id"
+                                rules="required"
+                                :label="trans('admin::app.leads.common.products.product-name')"
+                                :placeholder="trans('admin::app.leads.common.products.product-name')"
+                            />
 
-                    <x-admin::form.control-group.error ::name="`${inputName}[product_id]`" />
-                </x-admin::form.control-group>
+                            <x-admin::form.control-group.error ::name="`${inputName}[product_id]`" />
+                        </x-admin::form.control-group>
+                    </div>
+
+                    <!-- Info Icon (hover for product details) -->
+                    <button
+                        v-if="product.product_id && (product.description || product.sku)"
+                        type="button"
+                        class="mt-2 flex h-6 w-6 flex-shrink-0 cursor-help items-center justify-center rounded-full border border-gray-300 text-xs font-semibold text-gray-500 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-blue-900/20"
+                        @mouseenter="showSelectedPreview($event)"
+                        @mouseleave="hideSelectedPreview"
+                        @focus="showSelectedPreview($event)"
+                        @blur="hideSelectedPreview"
+                        data-testid="product-info-icon"
+                        aria-label="Show product details"
+                    >
+                        i
+                    </button>
+                </div>
             </x-admin::table.td>
 
             <!-- Product Quantity -->
@@ -169,6 +188,25 @@
                         class="icon-delete cursor-pointer text-2xl"
                     ></i>
                 </x-admin::form.control-group>
+
+                <!-- Selected product hover preview, teleported to body for z-index safety -->
+                <Teleport to="body">
+                    <div
+                        v-if="showingSelectedPreview && product.product_id && (product.description || product.sku)"
+                        class="pointer-events-none fixed z-[9999] w-72 rounded-lg border border-gray-200 bg-white p-3 shadow-xl dark:border-gray-700 dark:bg-gray-900"
+                        :style="selectedPreviewStyle"
+                        data-testid="selected-product-preview"
+                    >
+                        <p class="font-semibold text-gray-900 dark:text-white" v-text="product.name"></p>
+                        <p v-if="product.sku && product.sku !== product.name" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                            SKU: @{{ product.sku }}
+                        </p>
+                        <p v-if="product.description" class="mt-2 whitespace-pre-wrap text-sm text-gray-600 dark:text-gray-300" v-text="product.description"></p>
+                        <p v-if="product.price != null && product.price !== ''" class="mt-2 text-sm font-medium text-gray-800 dark:text-gray-200">
+                            Price: @{{ $admin?.formatPrice ? $admin.formatPrice(Number(product.price)) : Number(product.price).toFixed(2) }}
+                        </p>
+                    </div>
+                </Teleport>
             </x-admin::table.td>
         </x-admin::table.thead.tr>
     </script>
@@ -212,6 +250,8 @@
             data() {
                 return {
                     products: [],
+                    showingSelectedPreview: false,
+                    selectedPreviewStyle: { top: '0px', left: '0px' },
                 }
             },
 
@@ -253,6 +293,39 @@
                     this.product.price = result.price;
 
                     this.product.quantity = result.quantity ?? 1;
+
+                    this.product.description = result.description ?? null;
+
+                    this.product.sku = result.sku ?? null;
+                },
+
+                /**
+                 * Show the hover preview card for the selected product.
+                 *
+                 * @param {MouseEvent} event
+                 * @return {void}
+                 */
+                showSelectedPreview(event) {
+                    if (! this.product.product_id) return;
+
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    const previewWidth = 288;
+                    const gap = 8;
+
+                    let left = rect.right + gap;
+                    if (left + previewWidth > window.innerWidth) {
+                        left = Math.max(8, rect.left - previewWidth - gap);
+                    }
+
+                    this.selectedPreviewStyle = {
+                        top: `${Math.max(8, rect.top)}px`,
+                        left: `${left}px`,
+                    };
+                    this.showingSelectedPreview = true;
+                },
+
+                hideSelectedPreview() {
+                    this.showingSelectedPreview = false;
                 },
 
                 /**

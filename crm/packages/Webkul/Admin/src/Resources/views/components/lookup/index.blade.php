@@ -87,6 +87,8 @@
                         :key="item.id"
                         class="cursor-pointer px-4 py-2 text-gray-800 transition-colors hover:bg-blue-100 dark:text-white dark:hover:bg-gray-900"
                         @click="selectItem(item)"
+                        @mouseenter="showPreview($event, item)"
+                        @mouseleave="hidePreview"
                     >
                         @{{ item.name }}
                     </li>
@@ -108,6 +110,25 @@
                     </template>
                 </ul>
             </div>
+
+            <!-- Rich hover preview (teleported to body so z-index escapes parent stacking contexts) -->
+            <Teleport to="body">
+                <div
+                    v-if="previewItem && (previewItem.description || previewItem.price || previewItem.sku)"
+                    class="pointer-events-none fixed z-[9999] w-72 rounded-lg border border-gray-200 bg-white p-3 shadow-xl dark:border-gray-700 dark:bg-gray-900"
+                    :style="previewStyle"
+                    data-testid="lookup-item-preview"
+                >
+                    <p class="font-semibold text-gray-900 dark:text-white" v-text="previewItem.name"></p>
+                    <p v-if="previewItem.sku && previewItem.sku !== previewItem.name" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                        SKU: @{{ previewItem.sku }}
+                    </p>
+                    <p v-if="previewItem.description" class="mt-2 whitespace-pre-wrap text-sm text-gray-600 dark:text-gray-300" v-text="previewItem.description"></p>
+                    <p v-if="previewItem.price != null && previewItem.price !== ''" class="mt-2 text-sm font-medium text-gray-800 dark:text-gray-200">
+                        Price: @{{ formatPreviewPrice(previewItem.price) }}
+                    </p>
+                </div>
+            </Teleport>
         </div>
     </script>
 
@@ -177,6 +198,10 @@
                     isSearching: false,
 
                     cancelToken: null,
+
+                    previewItem: null,
+
+                    previewStyle: { top: '0px', left: '0px' },
                 };
             },
 
@@ -216,6 +241,48 @@
             },
 
             methods: {
+                /**
+                 * Show a rich hover preview for a result item.
+                 *
+                 * @param {MouseEvent} event
+                 * @param {Object} item
+                 * @return {void}
+                 */
+                showPreview(event, item) {
+                    if (! item) return;
+                    if (! item.description && item.price == null && ! item.sku) return;
+
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    const previewWidth = 288;
+                    const gap = 12;
+
+                    // Prefer right of the row; flip left if we'd overflow the viewport.
+                    let left = rect.right + gap;
+                    if (left + previewWidth > window.innerWidth) {
+                        left = Math.max(8, rect.left - previewWidth - gap);
+                    }
+
+                    this.previewStyle = {
+                        top: `${Math.max(8, rect.top)}px`,
+                        left: `${left}px`,
+                    };
+                    this.previewItem = item;
+                },
+
+                hidePreview() {
+                    this.previewItem = null;
+                },
+
+                formatPreviewPrice(price) {
+                    const n = Number(price);
+                    if (Number.isNaN(n)) return price;
+                    try {
+                        return this.$admin?.formatPrice ? this.$admin.formatPrice(n) : n.toFixed(2);
+                    } catch (_) {
+                        return n.toFixed(2);
+                    }
+                },
+
                 /**
                  * Toggle the popup.
                  *
