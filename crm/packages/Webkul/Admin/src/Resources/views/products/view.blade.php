@@ -84,21 +84,14 @@
 
             <!-- Activity Navigation -->
             <x-admin::activities
-                :endpoint="route('admin.products.activities.index', $product->id)" 
+                :endpoint="route('admin.products.activities.index', $product->id)"
                 :types="[
                     ['name' => 'all', 'label' => trans('admin::app.products.view.all')],
                     ['name' => 'note', 'label' => trans('admin::app.products.view.notes')],
                     ['name' => 'file', 'label' => trans('admin::app.products.view.files')],
                     ['name' => 'system', 'label' => trans('admin::app.products.view.change-logs')],
                 ]"
-                :extra-types="[
-                    ['name' => 'inventory', 'label' => trans('admin::app.products.view.inventories')],
-                ]"
-            >
-                <x-slot:inventory>
-                    @include('admin::products.view.inventory')
-                </x-slot>
-            </x-admin::activities>
+            ></x-admin::activities>
 
             {!! view_render_event('admin.products.view.right.activities.after', ['product' => $product]) !!}
         </div>

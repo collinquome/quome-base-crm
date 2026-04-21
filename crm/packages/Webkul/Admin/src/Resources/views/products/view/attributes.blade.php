@@ -21,7 +21,7 @@
                     ])->sortBy('sort_order')"
                     :entity="$product"
                     :url="route('admin.products.update', $product->id)"   
-                    :allow-edit="true"
+                    :allow-edit="bouncer()->hasPermission('products.edit')"
                 />
         
                 <!-- Custom Attributes --> 
@@ -32,7 +32,7 @@
                     ])->sortBy('sort_order')"
                     :entity="$product"
                     :url="route('admin.products.update', $product->id)"   
-                    :allow-edit="true"
+                    :allow-edit="bouncer()->hasPermission('products.edit')"
                 />
             </div>
             
