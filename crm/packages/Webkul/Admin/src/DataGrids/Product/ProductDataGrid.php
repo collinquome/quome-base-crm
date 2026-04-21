@@ -22,6 +22,7 @@ class ProductDataGrid extends DataGrid
             ->select(
                 'products.id',
                 'products.name',
+                'products.description',
                 'products.price',
                 'tags.name as tag_name',
             )
@@ -29,6 +30,7 @@ class ProductDataGrid extends DataGrid
 
         $this->addFilter('id', 'products.id');
         $this->addFilter('name', 'products.name');
+        $this->addFilter('description', 'products.description');
         $this->addFilter('price', 'products.price');
         $this->addFilter('tag_name', 'tags.name');
 
@@ -47,6 +49,16 @@ class ProductDataGrid extends DataGrid
             'sortable'   => true,
             'searchable' => true,
             'filterable' => true,
+        ]);
+
+        $this->addColumn([
+            'index'      => 'description',
+            'label'      => 'Description',
+            'type'       => 'string',
+            'sortable'   => true,
+            'searchable' => true,
+            'filterable' => true,
+            'closure'    => fn ($row) => $row->description ?? '--',
         ]);
 
         $this->addColumn([
