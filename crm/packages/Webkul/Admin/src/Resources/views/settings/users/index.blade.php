@@ -304,6 +304,28 @@
                                 </label>
                             </x-admin::form.control-group>
 
+                            <!-- Generate fresh magic link for existing users -->
+                            <x-admin::form.control-group v-if="user.id" class="!mb-4">
+                                <div class="rounded-md border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div class="text-sm text-gray-700 dark:text-gray-300">
+                                            <p class="font-medium">Password reset magic link</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                Generate a fresh one-time link you can copy and share with this user. They'll set a new password when they open it.
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            class="flex-shrink-0 rounded-md border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+                                            @click.prevent="resendInvite(user.id)"
+                                            data-testid="user-resend-invite-btn"
+                                        >
+                                            Generate link
+                                        </button>
+                                    </div>
+                                </div>
+                            </x-admin::form.control-group>
+
                             <div class="flex gap-4" v-if="!user.invite || user.id">
                                 <!-- Password -->
                                 <x-admin::form.control-group class="flex-1">

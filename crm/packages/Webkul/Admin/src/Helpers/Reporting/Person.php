@@ -38,10 +38,15 @@ class Person extends AbstractReporting
      */
     public function getTotalPersons($startDate, $endDate): int
     {
-        return $this->personRepository
+        $query = $this->personRepository
             ->resetModel()
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
+            ->whereBetween('created_at', [$startDate, $endDate]);
+
+        if ($this->userId) {
+            $query = $query->where('user_id', $this->userId);
+        }
+
+        return $query->count();
     }
 
     /**
@@ -53,7 +58,7 @@ class Person extends AbstractReporting
     {
         $tablePrefix = DB::getTablePrefix();
 
-        $items = $this->personRepository
+        $query = $this->personRepository
             ->resetModel()
             ->leftJoin('leads', 'persons.id', '=', 'leads.person_id')
             ->select('*', 'persons.id as id')
@@ -62,8 +67,13 @@ class Person extends AbstractReporting
             ->having(DB::raw('SUM('.$tablePrefix.'leads.lead_value)'), '>', 0)
             ->groupBy('person_id')
             ->orderBy('revenue', 'DESC')
-            ->limit($limit)
-            ->get();
+            ->limit($limit);
+
+        if ($this->userId) {
+            $query = $query->where('leads.user_id', $this->userId);
+        }
+
+        $items = $query->get();
 
         $items = $items->map(function ($item) {
             return [

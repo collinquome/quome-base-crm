@@ -38,10 +38,15 @@ class Organization extends AbstractReporting
      */
     public function getTotalOrganizations($startDate, $endDate): int
     {
-        return $this->organizationRepository
+        $query = $this->organizationRepository
             ->resetModel()
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
+            ->whereBetween('created_at', [$startDate, $endDate]);
+
+        if ($this->userId) {
+            $query = $query->where('user_id', $this->userId);
+        }
+
+        return $query->count();
     }
 
     /**
@@ -53,7 +58,7 @@ class Organization extends AbstractReporting
     {
         $tablePrefix = DB::getTablePrefix();
 
-        $items = $this->organizationRepository
+        $query = $this->organizationRepository
             ->resetModel()
             ->leftJoin('persons', 'organizations.id', '=', 'persons.organization_id')
             ->leftJoin('leads', 'persons.id', '=', 'leads.person_id')
@@ -63,8 +68,13 @@ class Organization extends AbstractReporting
             ->having(DB::raw('SUM('.$tablePrefix.'leads.lead_value)'), '>', 0)
             ->groupBy('organization_id')
             ->orderBy('revenue', 'DESC')
-            ->limit($limit)
-            ->get();
+            ->limit($limit);
+
+        if ($this->userId) {
+            $query = $query->where('leads.user_id', $this->userId);
+        }
+
+        $items = $query->get();
 
         $items = $items->map(function ($item) {
             return [
