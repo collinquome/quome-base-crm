@@ -14,7 +14,7 @@ return [
     ], [
         'key'   => 'leads.create',
         'name'  => 'admin::app.acl.create',
-        'route' => ['admin.leads.create', 'admin.leads.store'],
+        'route' => ['admin.leads.create', 'admin.leads.store', 'admin.leads.create_by_ai'],
         'sort'  => 1,
     ], [
         'key'   => 'leads.view',
@@ -24,12 +24,23 @@ return [
     ], [
         'key'   => 'leads.edit',
         'name'  => 'admin::app.acl.edit',
-        'route' => ['admin.leads.edit', 'admin.leads.update', 'admin.leads.mass_update'],
+        'route' => [
+            'admin.leads.edit',
+            'admin.leads.update',
+            'admin.leads.mass_update',
+            'admin.leads.attributes.update',
+            'admin.leads.stage.update',
+            'admin.leads.notes.update',
+            'admin.leads.product.add',
+            'admin.leads.product.remove',
+            'admin.leads.emails.store',
+            'admin.leads.emails.detach',
+        ],
         'sort'  => 3,
     ], [
         'key'   => 'leads.delete',
         'name'  => 'admin::app.acl.delete',
-        'route' => ['admin.leads.delete', 'admin.leads.mass_delete'],
+        'route' => ['admin.leads.delete', 'admin.leads.mass_delete', 'admin.leads.quotes.delete'],
         'sort'  => 4,
     ], [
         'key'   => 'quotes',
