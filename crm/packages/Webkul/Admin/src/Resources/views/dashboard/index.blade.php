@@ -213,14 +213,15 @@
             {!! view_render_event('admin.dashboard.index.date_filters.before') !!}
 
             <div class="flex flex-wrap gap-1.5">
-                <!-- User Filter (Manager View) -->
+                <!-- User Filter (hidden when the caller can only see their own data) -->
                 <select
-                    v-if="users.length > 0"
+                    v-if="users.length > 1"
                     v-model="filters.user_id"
                     class="flex min-h-[39px] rounded-md border px-3 py-2 text-sm text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400"
                     data-testid="dashboard-user-filter"
                 >
-                    <option value="">All Team Members</option>
+                    <!-- "All Team Members" only shown when the caller isn't scoped to a subset -->
+                    <option v-if="!scopedToSelf" value="">All Team Members</option>
                     <option
                         v-for="user in users"
                         :key="user.id"
@@ -397,6 +398,8 @@
                     return {
                         users: [],
 
+                        scopedToSelf: false,
+
                         activeTimeframe: 'Month',
 
                         timeframes: [
@@ -437,9 +440,19 @@
                     async fetchUsers() {
                         try {
                             const response = await this.$axios.get('/admin/team-stream/members');
-                            this.users = response.data?.data || [];
+                            const data = response.data || {};
+                            this.users = data.data || [];
+
+                            // If the server signals this user is scoped (group / individual),
+                            // drop "All Team Members" and preselect the auth user so the
+                            // dashboard always reflects a single, owned scope.
+                            this.scopedToSelf = !! data.scoped;
+                            if (this.scopedToSelf && data.current_user?.id) {
+                                this.filters.user_id = data.current_user.id;
+                            }
                         } catch {
                             this.users = [];
+                            this.scopedToSelf = false;
                         }
                     },
 

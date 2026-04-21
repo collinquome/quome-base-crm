@@ -23,9 +23,32 @@ class TeamStreamController extends Controller
 
     public function members(): JsonResponse
     {
-        $users = $this->userRepository->findWhere([['status', '=', 1]], ['id', 'name', 'email']);
+        // Scope the member list by the caller's view_permission. Producers
+        // (individual) see only themselves; Group sees their groups; Global/
+        // Administrator sees everyone. This prevents individual-scoped users
+        // from picking other reps from the dashboard dropdown.
+        $authorized = bouncer()->getAuthorizedUserIds();
 
-        return response()->json(['data' => $users]);
+        $query = $this->userRepository->scopeQuery(function ($q) use ($authorized) {
+            $q = $q->where('status', 1);
+            if ($authorized !== null) {
+                $q = $q->whereIn('id', $authorized);
+            }
+            return $q;
+        });
+
+        $users = $query->get(['id', 'name', 'email']);
+
+        return response()->json([
+            'data'          => $users,
+            'current_user'  => [
+                'id'   => auth()->guard('user')->id(),
+                'name' => auth()->guard('user')->user()?->name,
+            ],
+            // When non-null, the dashboard knows to hide "All Team Members"
+            // and preselect the current user (no cross-user visibility).
+            'scoped'        => $authorized !== null,
+        ]);
     }
 
     public function stream(Request $request): JsonResponse
