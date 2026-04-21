@@ -141,8 +141,19 @@ class AttributeController extends Controller
     public function checkUniqueValidation()
     {
         $attribute = $this->attributeRepository->findOneWhere([
-            'code' => request('attribute_code'),
+            'code'        => request('attribute_code'),
+            'entity_type' => request('entity_type'),
         ]);
+
+        // Short-circuit: if the attribute isn't marked unique, there's nothing
+        // to validate. The stock Krayin frontend hardcodes person[emails] and
+        // person[contact_numbers] to call this endpoint, but for an insurance
+        // CRM we explicitly want to allow duplicate household contacts, so
+        // is_unique is 0 on those attributes. Return validated=true so the
+        // client stops blocking lead creation.
+        if (! $attribute || ! $attribute->is_unique) {
+            return response()->json(['validated' => true]);
+        }
 
         return response()->json([
             'validated' => $this->attributeValueRepository->isValueUnique(
