@@ -16,7 +16,7 @@
                 <button
                     type="button"
                     class="primary-button"
-                    @click="$refs.actionStreamApp.showCreateModal()"
+                    @click="$refs.actionStreamApp.openCreate()"
                     data-testid="action-stream-create-btn"
                 >
                     New Action
@@ -204,6 +204,103 @@
                     </div>
                 </div>
 
+                <!-- Create Action Modal -->
+                <div v-if="createOpen" class="fixed inset-0 z-[9998] flex items-center justify-center bg-black/40" @click.self="closeCreate" data-testid="action-stream-create-modal">
+                    <div class="max-h-[90vh] w-full max-w-lg overflow-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900">
+                        <div class="mb-4 flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New Action</h3>
+                            <button type="button" class="rounded-md p-1 hover:bg-gray-100 dark:hover:bg-gray-800" @click="closeCreate">
+                                <span class="icon-cross-large text-xl"></span>
+                            </button>
+                        </div>
+
+                        <div class="flex flex-col gap-3">
+                            <!-- Entity type radios -->
+                            <div class="flex items-center gap-4 text-sm" data-testid="action-stream-entity-type">
+                                <label class="flex items-center gap-1.5">
+                                    <input type="radio" v-model="createForm.entity_type" value="leads" @change="createForm.entity = null; createForm.entity_search = ''" />
+                                    Lead
+                                </label>
+                                <label class="flex items-center gap-1.5">
+                                    <input type="radio" v-model="createForm.entity_type" value="persons" @change="createForm.entity = null; createForm.entity_search = ''" />
+                                    Contact
+                                </label>
+                            </div>
+
+                            <!-- Entity search (lightweight inline) -->
+                            <div class="relative">
+                                <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                                    @{{ createForm.entity_type === 'leads' ? 'Lead' : 'Contact' }}
+                                </label>
+                                <div v-if="createForm.entity" class="flex items-center justify-between rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800">
+                                    <span class="font-medium text-gray-900 dark:text-white" v-text="createForm.entity.name || createForm.entity.title || ('#' + createForm.entity.id)"></span>
+                                    <button type="button" class="text-xs text-gray-500 hover:text-red-600" @click="createForm.entity = null">Change</button>
+                                </div>
+                                <input
+                                    v-else
+                                    type="text"
+                                    v-model="createForm.entity_search"
+                                    @input="searchEntities"
+                                    :placeholder="createForm.entity_type === 'leads' ? 'Search leads…' : 'Search contacts…'"
+                                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                                    data-testid="action-stream-entity-search"
+                                />
+                                <ul v-if="!createForm.entity && createForm.entity_search.length > 1 && entityResults.length > 0" class="mt-1 max-h-40 overflow-auto rounded-md border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900" data-testid="action-stream-entity-results">
+                                    <li
+                                        v-for="item in entityResults"
+                                        :key="item.id"
+                                        class="cursor-pointer px-3 py-2 text-sm hover:bg-blue-50 dark:text-gray-200 dark:hover:bg-gray-800"
+                                        @click="selectEntity(item)"
+                                    >
+                                        @{{ item.title || item.name }} <span class="text-xs text-gray-400">#@{{ item.id }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Action fields -->
+                            <div class="flex gap-2">
+                                <select v-model="createForm.action_type" class="w-1/3 rounded-md border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                                    <option value="call">Call</option>
+                                    <option value="email">Email</option>
+                                    <option value="meeting">Meeting</option>
+                                    <option value="task">Task</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                                <select v-model="createForm.priority" :style="{ borderLeftWidth: '4px', borderLeftColor: priorityHexColor(createForm.priority) }" class="w-1/3 rounded-md border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                                    <option value="urgent">Urgent</option>
+                                    <option value="high">High</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="low">Low</option>
+                                </select>
+                                <input type="date" v-model="createForm.due_date" class="w-1/3 rounded-md border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300" />
+                            </div>
+
+                            <textarea
+                                v-model="createForm.description"
+                                rows="3"
+                                placeholder="Describe the action…"
+                                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                                data-testid="action-stream-create-description"
+                            ></textarea>
+
+                            <div v-if="createError" class="rounded-md bg-red-50 p-2 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400" v-text="createError"></div>
+
+                            <div class="flex justify-end gap-2 pt-2">
+                                <button type="button" class="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800" @click="closeCreate">Cancel</button>
+                                <button
+                                    type="button"
+                                    class="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                                    :disabled="!canSubmitCreate || createSaving"
+                                    @click="submitCreate"
+                                    data-testid="action-stream-create-submit"
+                                >
+                                    @{{ createSaving ? 'Saving…' : 'Save Action' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Pagination -->
                 <div v-if="pagination.lastPage > 1" class="mt-4 flex items-center justify-center gap-2">
                     <button
@@ -249,7 +346,28 @@
                             lastPage: 1,
                             total: 0,
                         },
+                        // Create-action modal state.
+                        createOpen: false,
+                        createSaving: false,
+                        createError: null,
+                        createForm: {
+                            entity_type: 'leads',
+                            entity: null,
+                            entity_search: '',
+                            action_type: 'call',
+                            priority: 'normal',
+                            due_date: new Date().toISOString().split('T')[0],
+                            description: '',
+                        },
+                        entityResults: [],
+                        entitySearchTimer: null,
                     };
+                },
+
+                computed: {
+                    canSubmitCreate() {
+                        return !! this.createForm.entity?.id && !! this.createForm.description.trim();
+                    },
                 },
 
                 mounted() {
@@ -296,6 +414,88 @@
                         }
                     },
 
+                    openCreate() {
+                        this.createOpen = true;
+                        this.createError = null;
+                        this.createForm = {
+                            entity_type: 'leads',
+                            entity: null,
+                            entity_search: '',
+                            action_type: 'call',
+                            priority: 'normal',
+                            due_date: new Date().toISOString().split('T')[0],
+                            description: '',
+                        };
+                        this.entityResults = [];
+                    },
+
+                    closeCreate() {
+                        this.createOpen = false;
+                        this.createError = null;
+                    },
+
+                    searchEntities() {
+                        if (this.entitySearchTimer) clearTimeout(this.entitySearchTimer);
+                        this.entitySearchTimer = setTimeout(async () => {
+                            const term = this.createForm.entity_search.trim();
+                            if (term.length < 2) {
+                                this.entityResults = [];
+                                return;
+                            }
+                            try {
+                                const url = this.createForm.entity_type === 'leads'
+                                    ? '/admin/leads/search'
+                                    : '/admin/contacts/persons/search';
+                                const response = await this.$axios.get(url, { params: { query: term } });
+                                this.entityResults = response.data?.data || [];
+                            } catch (error) {
+                                console.error('Entity search failed:', error);
+                                this.entityResults = [];
+                            }
+                        }, 300);
+                    },
+
+                    selectEntity(item) {
+                        this.createForm.entity = item;
+                        this.createForm.entity_search = '';
+                        this.entityResults = [];
+                    },
+
+                    async submitCreate() {
+                        if (! this.canSubmitCreate || this.createSaving) return;
+                        this.createSaving = true;
+                        this.createError = null;
+                        try {
+                            const payload = {
+                                actionable_type: this.createForm.entity_type,
+                                actionable_id: this.createForm.entity.id,
+                                action_type: this.createForm.action_type,
+                                priority: this.createForm.priority,
+                                description: this.createForm.description,
+                            };
+                            if (this.createForm.due_date) {
+                                payload.due_date = this.createForm.due_date;
+                            }
+                            await this.$axios.post('/admin/action-stream', payload);
+                            this.closeCreate();
+                            await this.fetchActions();
+                            this.fetchOverdueCount();
+                        } catch (error) {
+                            this.createError = error.response?.data?.message || 'Failed to create action.';
+                        } finally {
+                            this.createSaving = false;
+                        }
+                    },
+
+                    priorityHexColor(priority) {
+                        return {
+                            urgent: '#ef4444',
+                            high: '#f97316',
+                            normal: '#3b82f6',
+                            low: '#9ca3af',
+                        }[priority] || '#9ca3af';
+                    },
+
                     async fetchOverdueCount() {
                         try {
                             const response = await this.$axios.get('/admin/action-stream/overdue-count');
@@ -330,12 +530,6 @@
                     goToPage(page) {
                         this.pagination.currentPage = page;
                         this.fetchActions();
-                    },
-
-                    showCreateModal() {
-                        // For now, redirect to the API-based create flow
-                        // In future iterations, this would open an inline modal
-                        window.location.href = '/admin/activities';
                     },
 
                     formatDate(dateStr) {

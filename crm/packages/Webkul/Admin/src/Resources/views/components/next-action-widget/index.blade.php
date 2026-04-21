@@ -90,6 +90,7 @@
                                 </select>
                                 <select
                                     v-model="editData.priority"
+                                    :style="{ borderLeftWidth: '4px', borderLeftColor: priorityHexColor(editData.priority) }"
                                     class="w-1/3 rounded-md border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
                                     data-testid="edit-action-priority"
                                 >
@@ -150,6 +151,7 @@
                             </select>
                             <select
                                 v-model="newAction.priority"
+                                :style="{ borderLeftWidth: '4px', borderLeftColor: priorityHexColor(newAction.priority) }"
                                 class="w-1/3 rounded-md border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
                                 data-testid="next-action-priority-select"
                             >
@@ -581,6 +583,15 @@
 
                 actionTypeIcon(type) {
                     return { call: 'icon-call', email: 'icon-mail', meeting: 'icon-activity', task: 'icon-checkbox-outline', custom: 'icon-note' }[type] || 'icon-activity';
+                },
+
+                priorityHexColor(priority) {
+                    return {
+                        urgent: '#ef4444',
+                        high: '#f97316',
+                        normal: '#3b82f6',
+                        low: '#9ca3af',
+                    }[priority] || '#9ca3af';
                 },
             },
         });
