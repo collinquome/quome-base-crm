@@ -106,6 +106,31 @@ class LeadRepository extends Repository
     }
 
     /**
+     * Decode the `addresses_payload` JSON string emitted by the repeater
+     * on the lead-create contact block into the `addresses` array the
+     * Person model's fillable + cast expect. Filters empty rows.
+     */
+    protected function resolvePersonAddressesPayload(array $person): array
+    {
+        if (! array_key_exists('addresses_payload', $person)) {
+            return $person;
+        }
+
+        $decoded = json_decode((string) $person['addresses_payload'], true);
+
+        $person['addresses'] = is_array($decoded)
+            ? array_values(array_filter(
+                $decoded,
+                fn ($a) => is_array($a) && array_filter($a, fn ($v) => $v !== null && $v !== '')
+            ))
+            : [];
+
+        unset($person['addresses_payload']);
+
+        return $person;
+    }
+
+    /**
      * Create.
      *
      * @return \Webkul\Lead\Contracts\Lead
@@ -118,6 +143,8 @@ class LeadRepository extends Repository
          * Group-scoped users can see the contact they just created as part of the lead.
          */
         if (isset($data['person'])) {
+            $data['person'] = $this->resolvePersonAddressesPayload($data['person']);
+
             if (! empty($data['person']['id'])) {
                 $person = $this->personRepository->findOrFail($data['person']['id']);
             } else {
@@ -174,6 +201,8 @@ class LeadRepository extends Repository
          * For example, in the lead Kanban section, when switching stages, only the stage will be updated.
          */
         if (isset($data['person'])) {
+            $data['person'] = $this->resolvePersonAddressesPayload($data['person']);
+
             if (! empty($data['person']['id'])) {
                 $person = $this->personRepository->findOrFail($data['person']['id']);
             } else {

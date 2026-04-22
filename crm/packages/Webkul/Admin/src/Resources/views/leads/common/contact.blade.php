@@ -87,6 +87,16 @@
             ></v-phone-component>
         </x-admin::form.control-group>
 
+        <!-- Person Addresses (multi) -->
+        <x-admin::form.control-group>
+            <x-admin::addresses.repeater
+                :addresses="[]"
+                name-prefix="person"
+                :label="'Addresses'"
+                testid-prefix="lead-create-address"
+            />
+        </x-admin::form.control-group>
+
         <!-- Person Organization -->
         <x-admin::form.control-group>
             <x-admin::form.control-group.label>

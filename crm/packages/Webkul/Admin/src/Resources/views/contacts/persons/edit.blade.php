@@ -68,6 +68,13 @@
 
                 <v-organization></v-organization>
 
+                <div class="mt-4">
+                    <x-admin::addresses.repeater
+                        :addresses="$person->addresses ?? []"
+                        :label="'Addresses'"
+                    />
+                </div>
+
                 {!! view_render_event('admin.contacts.persons.edit.form_controls.after') !!}
             </div>
         </div>

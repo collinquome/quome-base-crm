@@ -44,6 +44,7 @@ class Person extends Model implements PersonContract
         'emails'          => 'array',
         'contact_numbers' => 'array',
         'address'         => 'array',
+        'addresses'       => 'array',
     ];
 
     /**
@@ -56,6 +57,7 @@ class Person extends Model implements PersonContract
         'emails',
         'contact_numbers',
         'address',
+        'addresses',
         'job_title',
         'user_id',
         'organization_id',

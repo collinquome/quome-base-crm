@@ -96,24 +96,52 @@
                         {!! view_render_event('admin.leads.view.person.contact_numbers.after', ['lead' => $lead]) !!}
 
                         @php
-                            $personAddress = is_string($lead->person->address ?? null)
-                                ? json_decode($lead->person->address, true)
-                                : ($lead->person->address ?? null);
-                            $addressLine = collect([
-                                $personAddress['address'] ?? null,
-                                $personAddress['city'] ?? null,
-                                $personAddress['state'] ?? null,
-                                $personAddress['postcode'] ?? null,
-                                $personAddress['country'] ?? null,
-                            ])->filter()->join(', ');
+                            // Prefer the new multi-address column; fall back to the legacy
+                            // single `address` blob so we keep rendering older data that
+                            // predates the migration.
+                            $personAddresses = $lead->person->addresses ?? [];
+
+                            if (empty($personAddresses) && ! empty($lead->person->address)) {
+                                $legacy = is_string($lead->person->address)
+                                    ? json_decode($lead->person->address, true)
+                                    : $lead->person->address;
+
+                                if (is_array($legacy) && array_filter($legacy)) {
+                                    $personAddresses = [[
+                                        'address_type'   => 'home',
+                                        'address_line_1' => $legacy['address']  ?? null,
+                                        'city'           => $legacy['city']     ?? null,
+                                        'state'          => $legacy['state']    ?? null,
+                                        'postcode'       => $legacy['postcode'] ?? null,
+                                        'country'        => $legacy['country']  ?? null,
+                                    ]];
+                                }
+                            }
                         @endphp
 
-                        @if ($addressLine)
-                            <div class="flex items-start gap-1 text-gray-700 dark:text-gray-300">
-                                <span class="icon-location mt-0.5 text-sm"></span>
-                                <span class="whitespace-pre-line">{{ $addressLine }}</span>
-                            </div>
-                        @endif
+                        @foreach ($personAddresses as $addr)
+                            @php
+                                $line = collect([
+                                    $addr['address_line_1'] ?? null,
+                                    $addr['address_line_2'] ?? null,
+                                    $addr['city'] ?? null,
+                                    $addr['state'] ?? null,
+                                    $addr['postcode'] ?? null,
+                                    $addr['country'] ?? null,
+                                ])->filter()->join(', ');
+                                $type = $addr['address_type'] ?? 'home';
+                            @endphp
+
+                            @if ($line)
+                                <div class="flex items-start gap-1 text-gray-700 dark:text-gray-300">
+                                    <span class="icon-location mt-0.5 text-sm"></span>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ $type }}</span>
+                                        <span class="whitespace-pre-line">{{ $line }}</span>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
                     </div>
                 </div>
             </x-slot>

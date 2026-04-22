@@ -56,7 +56,7 @@ class PersonController extends Controller
     {
         Event::dispatch('contacts.person.create.before');
 
-        $person = $this->personRepository->create($request->all());
+        $person = $this->personRepository->create($this->resolveAddressesPayload($request->all()));
 
         Event::dispatch('contacts.person.create.after', $person);
 
@@ -104,7 +104,7 @@ class PersonController extends Controller
     {
         Event::dispatch('contacts.person.update.before', $id);
 
-        $person = $this->personRepository->update($request->all(), $id);
+        $person = $this->personRepository->update($this->resolveAddressesPayload($request->all()), $id);
 
         Event::dispatch('contacts.person.update.after', $person);
 
@@ -191,6 +191,29 @@ class PersonController extends Controller
                 'message' => trans('admin::app.contacts.persons.index.delete-failed'),
             ], 400);
         }
+    }
+
+    /**
+     * Decode the `addresses_payload` JSON string emitted by the repeater
+     * component into the `addresses` array that Person's fillable + cast
+     * expect. Leaves data alone when the repeater wasn't on the form.
+     *
+     * @param  array  $data
+     * @return array
+     */
+    protected function resolveAddressesPayload(array $data): array
+    {
+        if (array_key_exists('addresses_payload', $data)) {
+            $decoded = json_decode((string) $data['addresses_payload'], true);
+
+            $data['addresses'] = is_array($decoded)
+                ? array_values(array_filter($decoded, fn ($a) => is_array($a) && array_filter($a, fn ($v) => $v !== null && $v !== '')))
+                : [];
+
+            unset($data['addresses_payload']);
+        }
+
+        return $data;
     }
 
     /**
