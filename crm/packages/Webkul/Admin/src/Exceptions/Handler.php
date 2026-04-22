@@ -45,6 +45,13 @@ class Handler extends AppExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
+        // Route AuthenticationException through unauthenticated() even when
+        // app.debug is off — otherwise the renderCustomResponse() branch below
+        // treats it as a generic Throwable and returns 500 instead of 401.
+        if ($exception instanceof AuthenticationException) {
+            return $this->unauthenticated($request, $exception);
+        }
+
         if (! config('app.debug')) {
             return $this->renderCustomResponse($exception);
         }
@@ -60,11 +67,17 @@ class Handler extends AppExceptionHandler
      */
     protected function unauthenticated($request, AuthenticationException $exception)
     {
-        if ($request->expectsJson()) {
+        if ($request->expectsJson() || $request->isJson() || $request->is('api/*')) {
             return response()->json(['message' => $this->jsonErrorMessages[401]], 401);
         }
 
-        return redirect()->guest(route('customer.session.index'));
+        // Admin is the only authenticated surface in this app; the original
+        // `customer.session.index` route was removed along with the shop.
+        if (\Illuminate\Support\Facades\Route::has('admin.login.index')) {
+            return redirect()->guest(route('admin.login.index'));
+        }
+
+        return redirect()->guest('/admin/login');
     }
 
     /**
