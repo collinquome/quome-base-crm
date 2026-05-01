@@ -146,14 +146,27 @@ class PersonController extends Controller
                     ->orWhereRaw("JSON_SEARCH(LOWER(JSON_UNQUOTE(contact_numbers)), 'one', ?) IS NOT NULL", [strtolower($like)]);
             });
         } else {
-            // No query — fall back to stock RequestCriteria behavior (supports ?search=).
-            $query = $this->personRepository
+            // No `?query=` — fall back to stock RequestCriteria behavior. The previous
+            // implementation called pushCriteria(...) then immediately reached for
+            // getModel()->query(), which discards the registered criteria entirely.
+            // The result was that the mega-search "persons" tab silently ignored the
+            // typed search term and returned the first 25 persons alphabetically — a
+            // user typing "Fred" would see other names back and assume the search had
+            // mistranslated their input. scopeQuery + all() preserves both criteria
+            // and the bouncer scope.
+            $userIds = bouncer()->getAuthorizedUserIds();
+
+            $results = $this->personRepository
                 ->pushCriteria(app(RequestCriteria::class))
-                ->getModel()
-                ->query();
-            if ($userIds = bouncer()->getAuthorizedUserIds()) {
-                $query->whereIn('user_id', $userIds);
-            }
+                ->scopeQuery(function ($q) use ($userIds) {
+                    if ($userIds) {
+                        $q = $q->whereIn('user_id', $userIds);
+                    }
+                    return $q->orderBy('name')->limit(25);
+                })
+                ->all();
+
+            return PersonResource::collection($results);
         }
 
         return PersonResource::collection($query->orderBy('name')->take(25)->get());
