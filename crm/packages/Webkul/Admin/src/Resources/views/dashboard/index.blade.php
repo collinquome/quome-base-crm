@@ -356,15 +356,25 @@
                         return '#';
                     },
 
+                    // Parse YYYY-MM-DD as a LOCAL date. Bare date strings handed to
+                        // `new Date()` are interpreted as UTC midnight, which becomes the
+                        // previous calendar day for any user west of UTC (e.g., Pacific) —
+                        // that's how an action set for tomorrow ends up labeled "Due Today".
+                    parseLocalDate(dateStr) {
+                        if (!dateStr) return null;
+                        const m = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})/);
+                        if (!m) return new Date(dateStr);
+                        return new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10));
+                    },
+
                     formatDate(dateStr) {
                         if (!dateStr) return '';
-                        const date = new Date(dateStr);
-                        const today = new Date();
-                        const tomorrow = new Date(today);
-                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        const date = this.parseLocalDate(dateStr);
+                        const today = new Date(); today.setHours(0,0,0,0);
+                        const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
                         if (date.toDateString() === today.toDateString()) return 'Today';
                         if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
-                        const diff = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
+                        const diff = Math.round((date - today) / (1000 * 60 * 60 * 24));
                         if (diff < 0) return `${Math.abs(diff)}d overdue`;
                         if (diff <= 7) return `In ${diff}d`;
                         return date.toLocaleDateString();
@@ -373,8 +383,8 @@
                     calculateUrgency(dueDate) {
                         if (!dueDate) return 'none';
                         const today = new Date(); today.setHours(0,0,0,0);
-                        const due = new Date(dueDate); due.setHours(0,0,0,0);
-                        const diffDays = Math.floor((due - today) / (1000*60*60*24));
+                        const due = this.parseLocalDate(dueDate); due.setHours(0,0,0,0);
+                        const diffDays = Math.round((due - today) / (1000*60*60*24));
                         if (diffDays < 0) return 'overdue';
                         if (diffDays === 0) return 'today';
                         if (diffDays <= 7) return 'this_week';
