@@ -127,7 +127,14 @@ class AttributeRepository extends Repository
 
             $currentUser = auth()->guard('user')->user();
 
-            if ($currentUser?->view_permission === 'group') {
+            // Administrators always get the unscoped user list. Otherwise the
+            // Sales Owner reassignment dropdown collapses to a single option
+            // (themselves) any time view_permission is misconfigured to
+            // 'individual' — which has happened in practice via the invite
+            // flow defaulting to individual.
+            $isAdministrator = optional($currentUser?->role)->permission_type === 'all';
+
+            if (! $isAdministrator && $currentUser?->view_permission === 'group') {
                 $query = urldecode($query);
 
                 $userIds = bouncer()->getAuthorizedUserIds();
@@ -136,7 +143,7 @@ class AttributeRepository extends Repository
                     ->when(! empty($userIds), fn ($queryBuilder) => $queryBuilder->whereIn('users.id', $userIds))
                     ->when(! empty($query), fn ($queryBuilder) => $queryBuilder->where('users.name', 'like', "%{$query}%"))
                     ->get();
-            } elseif ($currentUser?->view_permission === 'individual') {
+            } elseif (! $isAdministrator && $currentUser?->view_permission === 'individual') {
                 return $userRepository->where('users.id', $currentUser->id)->get();
             }
 
