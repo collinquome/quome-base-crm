@@ -5,7 +5,9 @@ Union Bay Risk - paying customer deployed on Railway.
 
 ## Repository
 - **Remote:** git@github.com:quome-cloud/unionbay-crm.git
-- **Branch:** `main` (autodeploy to Railway)
+- **Branches:**
+  - `main` — **dev environment.** Day-to-day work lands here. Push freely.
+  - `production` — **prod environment.** Only the user promotes commits here. **Never `git push origin main:production` or otherwise push to `production` without explicit ask.**
 
 ## Trello Board (Project Management)
 - **Board:** https://trello.com/b/IWLr4Pub/quome-union-bay-risk-todo
@@ -33,7 +35,7 @@ Union Bay Risk - paying customer deployed on Railway.
 1. **Pick a ticket** from the top of the Backlog
 2. **Move the card to In Progress** before starting any work
 3. **Work the ticket** — write code, write Playwright tests, verify locally
-4. **Commit and push** at least once per ticket (each ticket = separate commit + push to `main`)
+4. **Commit and push** at least once per ticket (each ticket = separate commit + push to `main`). Never push to `production`.
 5. **If blocked:** move to **Blocked**, add a comment explaining the blocker
 6. **If needs review:** move to **Review**, add a comment with what to check
 7. **When done:** move to **Done** and add a comment with:
@@ -49,22 +51,28 @@ Union Bay Risk - paying customer deployed on Railway.
 - If a ticket turns out to be unnecessary or duplicate, archive it
 - If a ticket is too large, break it into smaller cards
 
-## Railway Deployment & Production
+## Railway Deployment & Environments
 - **Project ID:** `d65119ac-4b43-483b-b54a-d911d465e464`
 - **Environment ID:** `07ef2598-e1e7-4486-8dc9-281112b70877`
 - **Service:** `crm-app`
 - **Railway Host:** `crm-app-production-23d7.up.railway.app`
 - **Dashboard:** https://railway.com/project/d65119ac-4b43-483b-b54a-d911d465e464
 - **Prod URL:** https://cornerstone-crm.quome.dev/admin/login
-- Pushes to `main` trigger autodeploy automatically
+
+### Branch → Environment Mapping
+| Branch | Environment | Who pushes | Autodeploys |
+|--------|-------------|------------|-------------|
+| `main` | dev | anyone (Claude included) | dev env on Railway |
+| `production` | prod (cornerstone-crm.quome.dev) | **user only** — promoted manually after the user has reviewed `main` | prod env on Railway |
 
 ### Production Deployment Rules
-- **Minimize breaking production** — test locally with Docker Compose before pushing
-- Pushes don't need to happen after every single ticket, but **periodically push batches** to keep prod up to date
-- After pushing, **verify prod is healthy**: `curl -s -o /dev/null -w "%{http_code}" https://cornerstone-crm.quome.dev/admin/login` should return 200
-- If prod breaks after a push, investigate immediately — check Railway logs via dashboard or `railway logs`
-- Migrations run automatically on deploy via the prod entrypoint
-- **Never push code that fails local Playwright tests**
+- **Claude must never push to `production`.** That branch is promoted manually by the user. If a fix needs to ship to prod, surface it and let the user promote.
+- **Minimize breaking dev** — test locally with Docker Compose before pushing to `main`.
+- Pushes to `main` don't need to happen after every single ticket, but **periodically push batches** to keep dev up to date.
+- After the user promotes to `production`, verify with: `curl -s -o /dev/null -w "%{http_code}" https://cornerstone-crm.quome.dev/admin/login` — should return 200.
+- If prod breaks after promotion, investigate immediately — check Railway logs via dashboard or `railway logs`.
+- Migrations run automatically on deploy via the prod entrypoint.
+- **Never push code that fails local Playwright tests.**
 
 ## Testing Requirements
 - **Every ticket MUST include Playwright tests** — no exceptions
@@ -87,9 +95,9 @@ npx playwright screenshot http://localhost:8190/admin/relevant-page test-results
 2. Write code + Playwright tests
 3. Run tests locally (`npx playwright test`)
 4. Commit with descriptive message
-5. Push to `main` (triggers Railway deploy)
-6. Verify prod is healthy
-7. Move card to Done with verification comment
+5. Push to `main` (deploys to **dev** env). **Do not push to `production`.**
+6. Move card to Done with verification comment
+7. The user promotes `main` → `production` separately when ready to ship
 
 ## Stack
 - Laravel PHP 8.2 (Krayin CRM base)
