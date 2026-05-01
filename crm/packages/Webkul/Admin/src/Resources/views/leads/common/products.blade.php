@@ -96,6 +96,7 @@
                                 ::name="`${inputName}[name]`"
                                 ::params="params"
                                 :placeholder="trans('admin::app.leads.common.products.product-name')"
+                                :preload="true"
                                 @on-selected="(product) => addProduct(product)"
                                 ::value="{ id: product.product_id, name: product.name }"
                             />

@@ -174,9 +174,12 @@ class ProductController extends Controller
             });
         }
 
+        // 20 was too tight for the lead "add product" dropdown which we now
+        // preload as a filterable list — bump to 500 so most catalogs fit
+        // entirely on the client and typing narrows in-memory.
         $products = $query
             ->orderBy('name', 'asc')
-            ->take(20)
+            ->take($term === '' ? 500 : 50)
             ->get();
 
         return ProductResource::collection($products);
