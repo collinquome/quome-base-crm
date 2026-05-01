@@ -95,6 +95,12 @@ class LeadController extends Controller
             $stages = $pipeline->stages;
         }
 
+        // Recruits is an Administrator-only kanban column.
+        $authUser = auth()->guard('user')->user();
+        if (! $authUser || optional($authUser->role)->permission_type !== 'all') {
+            $stages = $stages->where('code', '!=', 'recruits');
+        }
+
         foreach ($stages as $stage) {
             /**
              * We have to create a new instance of the lead repository every time, which is
