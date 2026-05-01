@@ -1976,6 +1976,16 @@ return [
                         'to'            => 'To',
                     ],
                 ],
+
+                'stages' => [
+                    'won-header'     => 'Great Win!',
+                    'lost-header'    => 'Closed Lost',
+                    'need-more-info' => 'Need More Details',
+                    'won-value'      => 'Premium',
+                    'closed-at'      => 'Closed Date',
+                    'lost-reason'    => 'Lost Reason',
+                    'save-btn'       => 'Save',
+                ],
             ],
 
             'view-switcher' => [

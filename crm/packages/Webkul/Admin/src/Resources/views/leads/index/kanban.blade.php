@@ -245,7 +245,15 @@
                         <!-- Header -->
                         <x-slot:header>
                             <h3 class="text-base font-semibold dark:text-white">
-                                @lang('admin::app.leads.index.kanban.stages.need-more-info')
+                                <template v-if="finalized.stage.code == 'won'">
+                                    @lang('admin::app.leads.index.kanban.stages.won-header')
+                                </template>
+                                <template v-else-if="finalized.stage.code == 'lost'">
+                                    @lang('admin::app.leads.index.kanban.stages.lost-header')
+                                </template>
+                                <template v-else>
+                                    @lang('admin::app.leads.index.kanban.stages.need-more-info')
+                                </template>
                             </h3>
                         </x-slot>
 
