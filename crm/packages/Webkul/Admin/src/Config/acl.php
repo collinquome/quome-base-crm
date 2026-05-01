@@ -14,7 +14,14 @@ return [
     ], [
         'key'   => 'leads.create',
         'name'  => 'admin::app.acl.create',
-        'route' => ['admin.leads.create', 'admin.leads.store', 'admin.leads.create_by_ai'],
+        'route' => [
+            'admin.leads.create',
+            'admin.leads.store',
+            'admin.leads.create_by_ai',
+            'admin.leads.import.show',
+            'admin.leads.import.process',
+            'admin.leads.import.template',
+        ],
         'sort'  => 1,
     ], [
         'key'   => 'leads.view',

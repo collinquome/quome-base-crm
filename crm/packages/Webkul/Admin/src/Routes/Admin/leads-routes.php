@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Webkul\Admin\Http\Controllers\Lead\ActivityController;
 use Webkul\Admin\Http\Controllers\Lead\EmailController;
 use Webkul\Admin\Http\Controllers\Lead\LeadController;
+use Webkul\Admin\Http\Controllers\Lead\LeadImportController;
 use Webkul\Admin\Http\Controllers\Lead\QuoteController;
 use Webkul\Admin\Http\Controllers\Lead\TagController;
 
@@ -13,6 +14,13 @@ Route::controller(LeadController::class)->prefix('leads')->group(function () {
     Route::get('create', 'create')->name('admin.leads.create');
 
     Route::post('create', 'store')->name('admin.leads.store');
+
+    // Quick bulk-import (Datalot-style CSV/XLSX). Lives outside the
+    // generic data-transfer importer because the column shape is fixed
+    // and the customer's workflow is "drop a Datalot file in".
+    Route::get('import', [LeadImportController::class, 'show'])->name('admin.leads.import.show');
+    Route::post('import', [LeadImportController::class, 'process'])->name('admin.leads.import.process');
+    Route::get('import/template.csv', [LeadImportController::class, 'template'])->name('admin.leads.import.template');
 
     Route::post('create-by-ai', 'createByAI')->name('admin.leads.create_by_ai');
 

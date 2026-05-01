@@ -37,6 +37,14 @@
             <div class="flex items-center gap-x-2.5">
                 @if (bouncer()->hasPermission('leads.create'))
                     <a
+                        href="{{ route('admin.leads.import.show') }}"
+                        class="secondary-button"
+                        data-testid="leads-import-btn"
+                    >
+                        Import
+                    </a>
+
+                    <a
                         href="{{ route('admin.leads.create', request()->query()) }}"
                         class="primary-button"
                     >
