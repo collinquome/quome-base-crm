@@ -30,7 +30,7 @@ class ActionStreamController extends Controller
         $filters = $request->only(['action_type', 'priority', 'due_from', 'due_to', 'status']);
 
         $query = $this->nextActionRepository->getPrioritizedActions(
-            auth()->guard('user')->id(),
+            $this->resolveTargetUserId($request),
             $filters
         );
 
@@ -42,13 +42,38 @@ class ActionStreamController extends Controller
     /**
      * Get the overdue action count for the current user.
      */
-    public function overdueCount(): JsonResponse
+    public function overdueCount(Request $request): JsonResponse
     {
         $count = $this->nextActionRepository->getOverdueCount(
-            auth()->guard('user')->id()
+            $this->resolveTargetUserId($request)
         );
 
         return response()->json(['data' => ['overdue_count' => $count]]);
+    }
+
+    /**
+     * Decide whose action stream to return.
+     *
+     * Defaults to the auth user. If user_id is supplied (dashboard user-picker),
+     * honor it only when the caller is authorized to view that user via bouncer
+     * scoping — otherwise silently fall back to self so producers can't peek at
+     * other reps by passing an arbitrary id.
+     */
+    protected function resolveTargetUserId(Request $request): int
+    {
+        $authId = (int) auth()->guard('user')->id();
+        $requested = $request->get('user_id');
+
+        if ($requested === null || $requested === '' || (int) $requested === $authId) {
+            return $authId;
+        }
+
+        $authorized = bouncer()->getAuthorizedUserIds();
+        if ($authorized === null || in_array((int) $requested, $authorized, true)) {
+            return (int) $requested;
+        }
+
+        return $authId;
     }
 
     /**

@@ -285,21 +285,38 @@
                         actions: [],
                         isLoading: true,
                         overdueCount: 0,
+                        selectedUserId: '',
                     };
                 },
 
                 mounted() {
                     this.fetchActions();
                     this.fetchOverdueCount();
+
+                    // Re-fetch whenever the dashboard user-picker / filters change
+                    // so the action stream tracks whichever rep the manager is viewing.
+                    this.$emitter.on('reporting-filter-updated', this.handleFilterUpdate);
+                },
+
+                beforeUnmount() {
+                    this.$emitter.off('reporting-filter-updated', this.handleFilterUpdate);
                 },
 
                 methods: {
+                    handleFilterUpdate(filters) {
+                        const next = filters?.user_id || '';
+                        if (next === this.selectedUserId) return;
+                        this.selectedUserId = next;
+                        this.fetchActions();
+                        this.fetchOverdueCount();
+                    },
+
                     async fetchActions() {
                         this.isLoading = true;
                         try {
-                            const response = await this.$axios.get('/admin/action-stream/stream', {
-                                params: { per_page: 10 },
-                            });
+                            const params = { per_page: 10 };
+                            if (this.selectedUserId) params.user_id = this.selectedUserId;
+                            const response = await this.$axios.get('/admin/action-stream/stream', { params });
                             this.actions = response.data?.data || [];
                         } catch {
                             this.actions = [];
@@ -310,7 +327,9 @@
 
                     async fetchOverdueCount() {
                         try {
-                            const response = await this.$axios.get('/admin/action-stream/overdue-count');
+                            const params = {};
+                            if (this.selectedUserId) params.user_id = this.selectedUserId;
+                            const response = await this.$axios.get('/admin/action-stream/overdue-count', { params });
                             this.overdueCount = response.data?.data?.overdue_count || 0;
                         } catch {
                             this.overdueCount = 0;
