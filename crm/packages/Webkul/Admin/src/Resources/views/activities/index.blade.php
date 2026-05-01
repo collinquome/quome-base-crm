@@ -402,53 +402,81 @@
             type="text/x-template"
             id="v-calendar-template"
         >
-            <v-vue-cal
-                hide-view-selector
-                :watchRealTime="true"
-                :twelveHour="true"
-                :disable-views="['years', 'year', 'month', 'day']"
-                style="height: calc(100vh - 240px);"
-                :class="{'vuecal--dark': theme === 'dark'}"
-                :events="events"
-                :time-format="'h:mm a'"
-                :events-on-month-view="'stack'"
-                :events-count-on-year-view="3"
-                :overlapping-events-stacked="true"
-                :min-event-width="60"
-                :cell-click-hold="false"
-                :sticky-events="true"
-                :events-overlap="true"
-                :detailed-time="true"
-                @ready="getActivities"
-                @view-change="getActivities"
-                @event-click="goToActivity"
-                locale="{{ app()->getLocale() }}"
-            >
-                <template #event="{ event }">
-                    <div
-                        class="vuecal__event-content"
-                        v-tooltip="{
-                            content: `
-                                <div class='mb-1 font-semibold text-white'>${event.title}</div>
-                                <div class='mb-1 text-xs text-gray-300'>${formatTime(event.start)} - ${formatTime(event.end)}</div>
-                                ${event.description ? `<div class='text-xs text-gray-200'>${event.description}</div>` : ''
-                            }`,
-                            html: true,
-                            placement: 'top',
-                            trigger: 'hover',
-                            delay: { show: 200, hide: 100 }
-                        }"
+            <div>
+                <!-- Manager / Administrator producer picker. Hidden for producers
+                     (server returns scoped=true) and when only one user is in scope. -->
+                <div
+                    v-if="users.length > 1 && ! scopedToSelf"
+                    class="mb-3 flex items-center gap-2"
+                    data-testid="calendar-user-picker"
+                >
+                    <label class="text-sm font-medium text-gray-600 dark:text-gray-300">
+                        Viewing calendar of
+                    </label>
+                    <select
+                        v-model="selectedUserId"
+                        @change="getActivitiesForCurrentRange()"
+                        class="rounded border border-gray-200 px-2.5 py-1.5 text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                        data-testid="calendar-user-picker-select"
                     >
-                        <div class="vuecal__event-title font-medium">
-                            @{{ event.title }}
-                        </div>
+                        <option value="">Everyone I can see</option>
+                        <option
+                            v-for="u in users"
+                            :key="u.id"
+                            :value="u.id"
+                        >@{{ u.name }}</option>
+                    </select>
+                </div>
 
-                        <div class="vuecal__event-time text-sm">
-                            @{{ formatTime(event.start) }} - @{{ formatTime(event.end) }}
+                <v-vue-cal
+                    ref="vuecal"
+                    hide-view-selector
+                    :watchRealTime="true"
+                    :twelveHour="true"
+                    :disable-views="['years', 'year', 'month', 'day']"
+                    style="height: calc(100vh - 280px);"
+                    :class="{'vuecal--dark': theme === 'dark'}"
+                    :events="events"
+                    :time-format="'h:mm a'"
+                    :events-on-month-view="'stack'"
+                    :events-count-on-year-view="3"
+                    :overlapping-events-stacked="true"
+                    :min-event-width="60"
+                    :cell-click-hold="false"
+                    :sticky-events="true"
+                    :events-overlap="true"
+                    :detailed-time="true"
+                    @ready="onReady"
+                    @view-change="onViewChange"
+                    @event-click="goToActivity"
+                    locale="{{ app()->getLocale() }}"
+                >
+                    <template #event="{ event }">
+                        <div
+                            class="vuecal__event-content"
+                            v-tooltip="{
+                                content: `
+                                    <div class='mb-1 font-semibold text-white'>${event.title}</div>
+                                    <div class='mb-1 text-xs text-gray-300'>${formatTime(event.start)} - ${formatTime(event.end)}</div>
+                                    ${event.description ? `<div class='text-xs text-gray-200'>${event.description}</div>` : ''
+                                }`,
+                                html: true,
+                                placement: 'top',
+                                trigger: 'hover',
+                                delay: { show: 200, hide: 100 }
+                            }"
+                        >
+                            <div class="vuecal__event-title font-medium">
+                                @{{ event.title }}
+                            </div>
+
+                            <div class="vuecal__event-time text-sm">
+                                @{{ formatTime(event.start) }} - @{{ formatTime(event.end) }}
+                            </div>
                         </div>
-                    </div>
-                </template>
-            </v-vue-cal>
+                    </template>
+                </v-vue-cal>
+            </div>
         </script>
 
         <script type="module">
@@ -489,19 +517,51 @@
                     return {
                         events: [],
                         theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+                        users: [],
+                        selectedUserId: '',
+                        scopedToSelf: false,
+                        currentRange: null,
                     };
                 },
 
                 mounted() {
-                    /**
-                     * Listen for the theme change event.
-                     *
-                     * @return {void}
-                     */
                     this.$emitter.on('change-theme', (theme) => this.theme = theme);
+                    this.fetchUsers();
                 },
 
                 methods: {
+                    /**
+                     * Pull the list of viewable team members so a manager can pick
+                     * one and see that producer's calendar. Producers come back
+                     * with scoped=true and only themselves in the list, so the
+                     * picker stays hidden for them.
+                     */
+                    async fetchUsers() {
+                        try {
+                            const response = await this.$axios.get('/admin/team-stream/members');
+                            const data = response.data || {};
+                            this.users = data.data || [];
+                            this.scopedToSelf = !! data.scoped;
+                        } catch {
+                            this.users = [];
+                            this.scopedToSelf = false;
+                        }
+                    },
+
+                    onReady(range) {
+                        this.currentRange = range;
+                        this.getActivities(range);
+                    },
+
+                    onViewChange(range) {
+                        this.currentRange = range;
+                        this.getActivities(range);
+                    },
+
+                    getActivitiesForCurrentRange() {
+                        if (this.currentRange) this.getActivities(this.currentRange);
+                    },
+
                     /**
                      * Get the activities for the calendar.
                      *
@@ -512,7 +572,15 @@
                     getActivities({startDate, endDate}) {
                         this.$root.pageLoaded = false;
 
-                        this.$axios.get("{{ route('admin.activities.get', ['view_type' => 'calendar']) }}" + `&startDate=${new Date(startDate).toLocaleDateString("en-US")}&endDate=${new Date(endDate).toLocaleDateString("en-US")}`)
+                        let url = "{{ route('admin.activities.get', ['view_type' => 'calendar']) }}"
+                            + `&startDate=${new Date(startDate).toLocaleDateString("en-US")}`
+                            + `&endDate=${new Date(endDate).toLocaleDateString("en-US")}`;
+
+                        if (this.selectedUserId) {
+                            url += `&user_id=${this.selectedUserId}`;
+                        }
+
+                        this.$axios.get(url)
                             .then(response => {
                                 this.events = this.processEvents(response.data.activities);
                             })

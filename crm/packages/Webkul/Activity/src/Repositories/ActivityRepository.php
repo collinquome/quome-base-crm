@@ -114,10 +114,13 @@ class ActivityRepository extends Repository
     }
 
     /**
-     * @param  string  $dateRange
+     * @param  array  $dateRange
+     * @param  int|null  $viewUserId  When set, restrict results to this single user (e.g.,
+     *                                manager picking a producer). The caller is responsible
+     *                                for verifying the auth user is allowed to see them.
      * @return mixed
      */
-    public function getActivities($dateRange)
+    public function getActivities($dateRange, ?int $viewUserId = null)
     {
         $tablePrefix = \DB::getTablePrefix();
 
@@ -134,7 +137,14 @@ class ActivityRepository extends Repository
             ->leftJoin('users', 'activities.user_id', '=', 'users.id')
             ->whereIn('type', ['call', 'meeting', 'lunch'])
             ->whereBetween('activities.schedule_from', $dateRange)
-            ->where(function ($query) {
+            ->where(function ($query) use ($viewUserId) {
+                if ($viewUserId !== null) {
+                    $query->where('activities.user_id', $viewUserId)
+                        ->orWhere('activity_participants.user_id', $viewUserId);
+
+                    return;
+                }
+
                 if ($userIds = bouncer()->getAuthorizedUserIds()) {
                     $query->whereIn('activities.user_id', $userIds)
                         ->orWhereIn('activity_participants.user_id', $userIds);

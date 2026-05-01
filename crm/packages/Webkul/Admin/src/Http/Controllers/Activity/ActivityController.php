@@ -57,11 +57,37 @@ class ActivityController extends Controller
             ? Carbon::createFromTimeString(request()->get('endDate').' 23:59:59')
             : Carbon::now()->endOfWeek()->format('Y-m-d H:i:s');
 
-        $activities = $this->activityRepository->getActivities([$startDate, $endDate])->toArray();
+        // Manager / Administrator can ask to view a single producer's calendar via
+        // the user-picker. The selected id is honored only when the auth user's
+        // bouncer scope allows that id; otherwise it falls back silently.
+        $viewUserId = $this->resolveCalendarViewUserId();
+
+        $activities = $this->activityRepository
+            ->getActivities([$startDate, $endDate], $viewUserId)
+            ->toArray();
 
         return response()->json([
             'activities' => $activities,
         ]);
+    }
+
+    /**
+     * Resolve the user_id we should use to scope the calendar fetch.
+     */
+    protected function resolveCalendarViewUserId(): ?int
+    {
+        $requested = request()->get('user_id');
+        if ($requested === null || $requested === '') {
+            return null;
+        }
+
+        $authorized = bouncer()->getAuthorizedUserIds();
+        // null means "see everyone" → trust the requested id.
+        if ($authorized === null || in_array((int) $requested, $authorized, true)) {
+            return (int) $requested;
+        }
+
+        return null;
     }
 
     /**
