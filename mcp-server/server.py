@@ -27,10 +27,13 @@ from typing import Any
 
 import httpx
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
+from urllib.parse import urlparse
 
 BASE_URL = os.environ.get("UNION_BAY_CRM_URL", "http://localhost:8190").rstrip("/")
 ENV_TOKEN = os.environ.get("UNION_BAY_CRM_TOKEN", "").strip()
 DEBUG = os.environ.get("UNION_BAY_CRM_DEBUG", "0") == "1"
+PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/")
 
 # Per-request bearer token, set by HTTP middleware in `main.py`.
 # Falls back to ENV_TOKEN for stdio mode.
@@ -38,7 +41,37 @@ _request_token: contextvars.ContextVar[str] = contextvars.ContextVar(
     "request_token", default=""
 )
 
-mcp = FastMCP("union-bay-crm")
+
+def _build_transport_security() -> TransportSecuritySettings | None:
+    """Allowlist the public hostname so FastMCP's DNS-rebinding protection
+    accepts our deployed Host header (otherwise it returns 421).
+
+    Returns None when no PUBLIC_BASE_URL is set (stdio / pure-localhost dev),
+    in which case FastMCP falls back to its localhost defaults.
+    """
+    if not PUBLIC_BASE_URL:
+        return None
+    parsed = urlparse(PUBLIC_BASE_URL)
+    host = parsed.netloc  # e.g. mcp-server-dev-0f6d.up.railway.app
+    if not host:
+        return None
+    scheme = parsed.scheme or "https"
+    return TransportSecuritySettings(
+        enable_dns_rebinding_protection=True,
+        allowed_hosts=[
+            host,
+            "127.0.0.1:*",
+            "localhost:*",
+        ],
+        allowed_origins=[
+            f"{scheme}://{host}",
+            "http://127.0.0.1:*",
+            "http://localhost:*",
+        ],
+    )
+
+
+mcp = FastMCP("union-bay-crm", transport_security=_build_transport_security())
 
 
 def _log(msg: str) -> None:
