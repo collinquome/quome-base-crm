@@ -4,17 +4,23 @@ Union Bay CRM — MCP server.
 Wraps the CRM's PublicApi (`/api/v1/*`) as a curated set of MCP tools for
 Claude Desktop / Claude Code to use on the user's behalf.
 
-Auth: Sanctum bearer token. Mint one with `uv run login.py`, then export it
-as UNION_BAY_CRM_TOKEN before starting Claude Desktop.
+Two transport modes:
+
+  - **stdio** (default): for `claude_desktop_config.json` use. Reads a
+    long-lived token from `UNION_BAY_CRM_TOKEN` env var.
+  - **http**: served by `main.py` ASGI app, behind the OAuth proxy.
+    Per-request bearer token is extracted by middleware and read from
+    the `_request_token` contextvar.
 
 Env:
   UNION_BAY_CRM_URL    Base URL, default http://localhost:8190
-  UNION_BAY_CRM_TOKEN  Sanctum bearer token (required for any non-whoami tool)
+  UNION_BAY_CRM_TOKEN  Sanctum bearer (stdio mode only)
   UNION_BAY_CRM_DEBUG  "1" to log requests to stderr
 """
 
 from __future__ import annotations
 
+import contextvars
 import os
 import sys
 from typing import Any
@@ -23,8 +29,14 @@ import httpx
 from mcp.server.fastmcp import FastMCP
 
 BASE_URL = os.environ.get("UNION_BAY_CRM_URL", "http://localhost:8190").rstrip("/")
-TOKEN = os.environ.get("UNION_BAY_CRM_TOKEN", "").strip()
+ENV_TOKEN = os.environ.get("UNION_BAY_CRM_TOKEN", "").strip()
 DEBUG = os.environ.get("UNION_BAY_CRM_DEBUG", "0") == "1"
+
+# Per-request bearer token, set by HTTP middleware in `main.py`.
+# Falls back to ENV_TOKEN for stdio mode.
+_request_token: contextvars.ContextVar[str] = contextvars.ContextVar(
+    "request_token", default=""
+)
 
 mcp = FastMCP("union-bay-crm")
 
@@ -35,10 +47,15 @@ def _log(msg: str) -> None:
         sys.stderr.flush()
 
 
+def _current_token() -> str:
+    return _request_token.get() or ENV_TOKEN
+
+
 def _client() -> httpx.Client:
     headers = {"Accept": "application/json"}
-    if TOKEN:
-        headers["Authorization"] = f"Bearer {TOKEN}"
+    token = _current_token()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     return httpx.Client(base_url=f"{BASE_URL}/api/v1", headers=headers, timeout=30.0)
 
 
@@ -49,7 +66,7 @@ def _call(method: str, path: str, **kwargs) -> dict[str, Any]:
     if r.status_code == 401:
         return {
             "error": "unauthorized",
-            "hint": "Run `uv run login.py` to mint a fresh token, then re-export UNION_BAY_CRM_TOKEN and restart Claude Desktop.",
+            "hint": "Token is missing or revoked. In Claude Desktop, remove and re-add the connector to re-authenticate.",
         }
     if r.status_code >= 400:
         try:
@@ -318,4 +335,5 @@ def add_comment(target_type: str, target_id: int, body: str) -> dict[str, Any]:
 
 
 if __name__ == "__main__":
+    # stdio mode for local Claude Desktop / Claude Code config
     mcp.run()
